@@ -1,6 +1,10 @@
 #!/usr/bin/python
 ## Author: Michael Pilosov
 ## Copyright 2017
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.stats as sstats 
+from scipy.stats import gaussian_kde as gkde
 
 def comparepush(x, obs_dens, post_dens):
     plt.plot(x, obs_dens.pdf(x.transpose()), 'y', label='obs')
@@ -41,6 +45,20 @@ def compare_output_dens(x, analytical_dens, estimated_dens, viewdim=0, lab_1='ob
     plt.legend()
     plt.show()
 
+def view_est_dens(x, estimated_dens, viewdim=0, lab='KDE', title=''):
+    input_dim = estimated_dens.d
+    num_samples = len(x)
+    y = np.zeros( (input_dim, num_samples) )
+    y[viewdim,:] = x # specify dim (list) to view crosssections e.g. [0,1] gives you the diagonal view through the first two dimensions
+    plt.plot(x, estimated_dens.evaluate(y), 'y', label=lab)
+    if type(viewdim)==int:
+        plt.xlabel('$\lambda_%d$'%viewdim)
+    else:
+        plt.xlabel('$\lambda_{%s}$'%str(viewdim))
+    plt.title(title)
+    plt.legend()
+    plt.show()
+ 
 def compare_est_input_dens(x, estimated_dens1, estimated_dens2, viewdim=0, lab_1='KDE prior', lab_2='KDE post', title=''):
     input_dim = estimated_dens1.d
     num_samples = len(x)
