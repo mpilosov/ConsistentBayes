@@ -93,6 +93,8 @@ def pltaccept(lam, lam_accept, N, eta_r, i=0, j=1): # plots first N of accepted,
     if i == j:
         inds = [k for k in range(N+1) if lam[i,k] in lam_accept]
         plt.scatter(lam[i,inds], eta_r[inds])
+        plt.ylabel('$\eta$')
+        plt.xlabel('$\lambda_%d$'%i)
     else:
         plt.scatter(lam[i,:], lam[j,:], s=2)
         plt.scatter(lam_accept[i,0:N], lam_accept[j,0:N], s=4)
