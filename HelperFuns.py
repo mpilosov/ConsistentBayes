@@ -61,9 +61,9 @@ def view_analytical_dens(x, analytical_dens, viewdim=0, lab='KDE', title=''):
  
 
 def view_est_dens(x, estimated_dens, viewdim=0, lab='KDE', title=''):
-    input_dim = estimated_dens.d
+    dim = estimated_dens.d
     num_samples = len(x)
-    y = np.zeros( (input_dim, num_samples) )
+    y = np.zeros( (dim, num_samples) )
     y[viewdim,:] = x # specify dim (list) to view crosssections e.g. [0,1] gives you the diagonal view through the first two dimensions
     plt.plot(x, estimated_dens.evaluate(y), 'y', label=lab)
     if type(viewdim)==int:
