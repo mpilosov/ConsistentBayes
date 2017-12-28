@@ -8,8 +8,7 @@ plt.rcParams['figure.figsize'] = 5, 5
 
 
 
-def sandbox(num_samples = int(1E4), lam_bound = [3,6], lam_0=3.5, 
-            t_0 = 0.1, Delta_t = 0.1, num_observations = 4, sd=1):
+def sandbox(num_samples = int(1E4), lam_bound = [3,6], lam_0=3.5, t_0 = 0.1, Delta_t = 0.1, num_observations = 4, sd=1, compare=False):
     # NOTE this version only uses constant variances for the sake
     # of interactivity.
     # TODO overload sd variable to take in lists/arrays
@@ -52,7 +51,12 @@ def sandbox(num_samples = int(1E4), lam_bound = [3,6], lam_0=3.5,
 
     r = r[:,np.newaxis]
     eta_r = r[:,0]/M
-    
+    if compare:
+        print('Performing Accept/Reject to estimate the pushforward of the posterior.')
+        accept_inds = [i for i in range(num_samples) if eta_r[i] > np.random.uniform(0,1) ] 
+        num_accept = len(accept_inds)
+        print('Number accepted: %d = %2.2f%%'%(num_accept, 100*np.float(num_accept)/num_samples))
+
     print('\tEntropy is %1.4e'%sstats.entropy( obs_dens.pdf(D), pf_dens.evaluate(D) ))
     
     res = 50;
@@ -63,14 +67,19 @@ def sandbox(num_samples = int(1E4), lam_bound = [3,6], lam_0=3.5,
     plt.subplot(1, 3, 1)
     x = np.linspace(-0.25, max_x, res)
     plt.plot(x, pf_dens.evaluate(x))
-    plt.title('Pushforward of Prior')
-    plt.xlabel('O(lambda)')
+    plt.title('Pushforward Q(Prior)')
+    plt.xlabel('Q(lambda)')
     
     plt.subplot(1, 3, 2)
     xx = np.linspace(0, max_x, res)
     plt.plot(xx, obs_dens.pdf(xx))
+    if compare:
+        push_post_dens_kde = gkde(D[accept_inds])
+        pf = push_post_dens_kde.pdf(xx)
+        plt.plot(xx, pf/np.sum(pf))
+        plt.legend(['Observed','Recovered'])
     plt.title('Observed Density')
-    plt.xlabel('O(lambda)')
+    plt.xlabel('Q(lambda)')
 
     plt.subplot(1, 3, 3)
     plt.scatter(lam, eta_r)
