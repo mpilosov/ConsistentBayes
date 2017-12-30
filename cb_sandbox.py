@@ -14,6 +14,7 @@ fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
     # NOTE this version only uses constant variances for the sake
     # of interactivity.
     # TODO overload sd variable to take in lists/arrays
+    np.random.seed(0) # want deterministic results
     sigma = sd*np.ones(num_observations)
     
     if num_observations == 1:
@@ -40,6 +41,7 @@ fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
     
     for seed in trial_seeds:
         if not fixed_noise:
+            np.random.seed(seed)
             obs_data = lam_0 * np.exp(-t) + np.random.randn(int(num_observations))*sigma
             
         np.random.seed(seed)
