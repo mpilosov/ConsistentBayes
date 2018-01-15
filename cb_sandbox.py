@@ -4,13 +4,12 @@ from matplotlib import pyplot as plt
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde as gkde
 plt.rcParams.update({'font.size': 14})
-
-
-
+from ipywidgets import widgets
+from ipywidgets import interactive_output
 
 def sandbox(num_samples = int(1E4), lam_bound = [3,6], lam_0=3.5, 
 t_0 = 0.1, Delta_t = 0.1, num_observations = 4, sd=1, 
-fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
+fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_trials = 1):
     # NOTE this version only uses constant variances for the sake
     # of interactivity.
     # TODO overload sd variable to take in lists/arrays
@@ -22,15 +21,24 @@ fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
         
     t = np.linspace(t_0, t_0 + Delta_t*(num_observations-1), num_observations)
     
-    def Q_fun(lam, obs_data):
-        predictions = lam*np.exp(-t)
+    def Q_fun(lam_0, obs_data):
+        if fun_choice == 0:
+            predictions = lam_0*np.exp(-t)
+        elif fun_choice == 1:
+            predictions = np.sin(lam_0*t)
+        else:
+            return None
         residuals = predictions - obs_data
         QoI = np.sum( (residuals/sigma)**2 )
         return QoI
         
     # Create observations... additive noise.
-    obs_data = lam_0 * np.exp(-t) + np.random.randn(int(num_observations))*sigma
-    
+    if fun_choice == 0:
+        obs_data = lam_0 * np.exp(-t) + np.random.randn(int(num_observations))*sigma
+    elif fun_choice == 1:
+        obs_data = np.sin(lam_0*t) + np.random.randn(int(num_observations))*sigma
+    else:
+        return None
     # Global options - Consistent over all the trials
     plt.rcParams['figure.figsize'] = (18, 6)
     plt.close('all')
@@ -42,8 +50,11 @@ fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
     for seed in trial_seeds:
         if not fixed_noise:
             np.random.seed(seed)
-            obs_data = lam_0 * np.exp(-t) + np.random.randn(int(num_observations))*sigma
-            
+            if fun_choice == 0:
+                obs_data = lam_0 * np.exp(-t) + np.random.randn(int(num_observations))*sigma
+            elif fun_choice == 1:
+                obs_data = np.sin(lam_0*t) + np.random.randn(int(num_observations))*sigma
+        
         np.random.seed(seed)
         # Sample the Parameter Space
         a, b = lam_bound
@@ -64,7 +75,7 @@ fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
         
         # Solve the problem
         r = obs_dens.pdf(D) / pf_dens.evaluate(D) # vector of ratios evaluated at all the O(lambda)'s
-        M = np.max(r)
+        M = 1.0 + 0*np.max(r)
 
         r = r[:,np.newaxis]
         eta_r = r[:,0]/M
@@ -75,7 +86,7 @@ fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
             num_accept = len(accept_inds)
             num_accept_list.append(num_accept)
         
-        entropy_list.append( sstats.entropy( obs_dens.pdf(D), pf_dens.evaluate(D) ) )    
+#         entropy_list.append( sstats.entropy( obs_dens.pdf(D), pf_dens.evaluate(D) ) )    
         
         res = 50;
         max_x = D.max();
@@ -118,11 +129,151 @@ fixed_noise = True, compare = False, smooth_post = False, num_trials = 1):
     
     plt.show()
     
-    print('\tMean Entropy is: %.2f with var %.2f'%(np.mean(entropy_list), np.std(entropy_list)))
-    print('Entropies: ')
+#     print('\tMean Entropy is: %.2f with var %.2f'%(np.mean(entropy_list), np.std(entropy_list)))
+#     print('Entropies: ')
     if compare or smooth_post:
-        print(['%.2f '%entropy_list[n] for n in range(num_trials)])
-        print('Median Acceptance Rate: %2.2f%%'%(np.mean(num_accept_list)/num_samples) )
+#         print(['%.2f '%entropy_list[n] for n in range(num_trials)])
+        print('Median Acceptance Rate: %2.2f%%'%(100*np.mean(num_accept_list)/num_samples) )
     #     return eta_r
 
 
+
+
+
+
+def make_tabulated_sandbox(num_experiments=1):
+    # We create many copies of the same widget objects in order to isolate our experimental areas.
+    num_samples = [widgets.IntSlider(value=1500, continuous_update=False, 
+        orientation='vertical', disable=False,
+        min=int(5E2), max=int(2.5E4), step=500, 
+        description='Samples $N$') for k in range(num_experiments)]
+
+    sd = [widgets.FloatSlider(value=0.25, continuous_update=False, 
+        orientation='vertical', disable=False,
+        min=0.05, max=1.75, step=0.05, 
+        description='Const. $\sigma$') for k in range(num_experiments)]
+
+    lam_min, lam_max = 2.0, 7.0
+    lam_bound = [widgets.FloatRangeSlider(value=[3.0, 6.0], continuous_update=False, 
+        orientation='horizontal', disable=False,
+        min=lam_min, max = lam_max, step=0.5, 
+        description='Param: $\Lambda \in$') for k in range(num_experiments)]
+
+    lam_0 = [widgets.FloatSlider(value=4.5, continuous_update=False, 
+        orientation='horizontal', disable=False,
+        min=lam_bound[k].value[0], max=lam_bound[k].value[1], step=0.1, 
+        description='IC: $\lambda_0$') for k in range(num_experiments)]
+
+
+    t_0 = [widgets.FloatSlider(value=0.5, continuous_update=False, 
+        orientation='horizontal', disable=False,
+        min=0.1, max=2.0, step=0.1,
+        description='$t_0$ =', readout_format='.1f') for k in range(num_experiments)]
+
+    Delta_t = [widgets.FloatSlider(value=0.1, continuous_update=False, 
+        orientation='horizontal', disable=False,
+        min=0.05, max=0.5, step=0.05,
+        description='$\Delta_t$ =', readout_format='.2f') for k in range(num_experiments)]
+
+    num_observations = [widgets.IntSlider(value=50, continuous_update=False, 
+        orientation='horizontal', disable=False,
+        min=1, max=100, 
+        description='# Obs. =') for k in range(num_experiments)]
+    
+    compare = [widgets.Checkbox(value=False, disable=False,
+        description='Observed v. Q(Post)') for k in range(num_experiments)]
+    
+    smooth_post = [widgets.Checkbox(value=False, disable=False,
+        description='Smooth Posterior') for k in range(num_experiments)]
+    
+    fixed_noise = [widgets.Checkbox(value=False, disable=False,
+        description='Fixed Noise Model') for k in range(num_experiments)]
+    
+    num_trials = [widgets.IntSlider(value=1, continuous_update=False, 
+        orientation='vertical', disable=False,
+        min=1, max=25, 
+        description='Num. Trials') for k in range(num_experiments)]
+    
+    # IF YOU ADD MORE FUNCTIONS to cb_sandbox.py, increase max below.
+    fun_choice = [widgets.IntSlider(value=0, continuous_update=False, 
+        orientation='horizontal', disable=False,
+        min=0, max=1, 
+        description='Fun. Choice') for k in range(num_experiments)]
+                                    
+    Keys = [{'num_samples': num_samples[k], 
+            'lam_bound': lam_bound[k], 
+            'lam_0': lam_0[k], 
+            't_0': t_0[k], 
+            'Delta_t': Delta_t[k],
+            'num_observations': num_observations[k], 
+            'sd': sd[k],
+            'compare': compare[k],
+            'smooth_post': smooth_post[k],
+            'fixed_noise': fixed_noise[k],
+            'num_trials': num_trials[k], 
+            'fun_choice': fun_choice[k]} for k in range(num_experiments)] 
+
+    # Make all the interactive outputs for each tab and store them in a vector called out. (for output)
+    out = [interactive_output(sandbox, Keys[k]) for k in range(num_experiments)]
+    
+    
+    ### LINK WIDGETS TOGETHER (dependent variables) ###
+    # if you change the bounds on the parameter space, update the bounds of lambda_0                          
+    def update_lam_0(*args):
+        k = tab_nest.selected_index
+    #     lam_0[k].value = np.minimum(lam_0[k].value, lam_bound[k].value[1] )
+    #     lam_0[k].value = np.maximum(lam_0[k].value, lam_bound[k].value[0] )
+        lam_0[k].min = lam_bound[k].value[0] 
+        lam_0[k].max = lam_bound[k].value[1]
+
+    [lam_bound[k].observe(update_lam_0, 'value') for k in range(num_experiments)]
+
+
+    ### GENERATE USER INTERFACE ###
+    lbl = widgets.Label("UQ Sandbox", disabled=False)
+    # horizontal and vertical sliders are grouped together, displayed in one horizontal box.
+    # This HBox lives in a collapsable accordion below which the results are displayed.
+    h_sliders = [widgets.VBox([lam_bound[k], lam_0[k], 
+                               t_0[k], Delta_t[k], 
+                               num_observations[k] ]) for k in range(num_experiments) ]
+    v_sliders = [widgets.HBox([ num_samples[k], num_trials[k],
+                               sd[k] ]) for k in range(num_experiments) ]
+    options = [ widgets.VBox([widgets.Text('Model Options', disabled=True), 
+                              fixed_noise[k], fun_choice[k],
+                              widgets.Text('Plotting Options', disabled=True), 
+                              compare[k], smooth_post[k]]) for k in range(num_experiments)]
+    user_interface = [widgets.HBox([h_sliders[k], options[k], v_sliders[k]]) for k in range(num_experiments)]
+    
+    # format the widgets layout (non-default options)
+    for k in range(num_experiments): 
+        h_sliders[k].layout.justify_content = 'center'
+        v_sliders[k].layout.justify_content = 'center'
+        user_interface[k].layout.justify_content = 'center'
+
+        
+    ### MAKE TABULATED NOTEBOOK ###
+    # Create our pages
+    pages = [widgets.HBox() for k in range(num_experiments)]
+
+    # instantiate notebook with tabs (accordions) representing experiments
+    tab_nest = widgets.Tab()
+    tab_nest.children = [pages[k] for k in range(num_experiments)]
+
+    # title your notebooks
+    experiment_names = ['Experiment %d'%k for k in range(num_experiments)]
+    for k in range(num_experiments):
+        tab_nest.set_title(k, experiment_names[k])
+
+    # Spawn the children!!!
+    for k in range(num_experiments):
+    #     content = widgets.VBox( [user_interface[k], out[k]] )
+        A = widgets.Accordion(children=[ user_interface[k] ])
+        A.set_title(0,lbl.value)
+        A.layout.justify_content = 'center'
+        content = widgets.VBox([ A, out[k]  ])
+        content.layout.justify_content = 'center'
+        tab_nest.children[k].children = [content]
+    
+    return tab_nest
+
+# define wrapper function to repeat trials. 
