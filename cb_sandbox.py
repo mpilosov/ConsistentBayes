@@ -151,13 +151,13 @@ def make_tabulated_sandbox(num_experiments=1):
     sd = [widgets.FloatSlider(value=0.25, continuous_update=False, 
         orientation='vertical', disable=False,
         min=0.05, max=1.75, step=0.05, 
-        description='Const. $\sigma$') for k in range(num_experiments)]
+        description='$\sigma$') for k in range(num_experiments)]
 
     lam_min, lam_max = 2.0, 7.0
     lam_bound = [widgets.FloatRangeSlider(value=[3.0, 6.0], continuous_update=False, 
         orientation='horizontal', disable=False,
         min=lam_min, max = lam_max, step=0.5, 
-        description='Param: $\Lambda \in$') for k in range(num_experiments)]
+        description='$\Lambda \in$') for k in range(num_experiments)]
 
     lam_0 = [widgets.FloatSlider(value=4.5, continuous_update=False, 
         orientation='horizontal', disable=False,
@@ -199,7 +199,10 @@ def make_tabulated_sandbox(num_experiments=1):
         orientation='horizontal', disable=False,
         min=0, max=1, 
         description='Fun. Choice') for k in range(num_experiments)]
-                                    
+    
+    fixed_obs_window = [widgets.Checkbox(value=False, disable=False,
+        description='Fixed Obs. Window') for k in range(num_experiments)]
+                                
     Keys = [{'num_samples': num_samples[k], 
             'lam_bound': lam_bound[k], 
             'lam_0': lam_0[k], 
@@ -227,8 +230,29 @@ def make_tabulated_sandbox(num_experiments=1):
         lam_0[k].max = lam_bound[k].value[1]
 
     [lam_bound[k].observe(update_lam_0, 'value') for k in range(num_experiments)]
-
-
+    
+    
+    current_window_size = [ num_observations[k].value*Delta_t[k].value for k in range(num_experiments)]
+    def lock_window_size(*args): # if you want to lock the window
+        k = tab_nest.selected_index
+        if fixed_obs_window[k].value:
+            current_window_size[k] = num_observations[k].value*Delta_t[k].value # record the present value for later use.
+        
+    def update_num_obs(*args): # update num obs if Delta_t changes
+        k = tab_nest.selected_index
+        if fixed_obs_window[k].value:
+            num_observations[k].value = current_window_size[k]/Delta_t[k].value
+    
+    def update_delta_t(*args): # update num obs if Delta_t changes
+        k = tab_nest.selected_index
+        if fixed_obs_window[k].value:
+            Delta_t[k].value = current_window_size[k]/num_observations[k].value
+    
+    [fixed_obs_window[k].observe(lock_window_size, 'value') for k in range(num_experiments)]
+    [Delta_t[k].observe(update_num_obs, 'value') for k in range(num_experiments)]
+    [num_observations[k].observe(update_delta_t, 'value') for k in range(num_experiments)]
+    
+    
     ### GENERATE USER INTERFACE ###
     lbl = widgets.Label("UQ Sandbox", disabled=False)
     # horizontal and vertical sliders are grouped together, displayed in one horizontal box.
@@ -239,7 +263,7 @@ def make_tabulated_sandbox(num_experiments=1):
     v_sliders = [widgets.HBox([ num_samples[k], num_trials[k],
                                sd[k] ]) for k in range(num_experiments) ]
     options = [ widgets.VBox([widgets.Text('Model Options', disabled=True), 
-                              fixed_noise[k], fun_choice[k],
+                              fixed_noise[k], fixed_obs_window[k], fun_choice[k],
                               widgets.Text('Plotting Options', disabled=True), 
                               compare[k], smooth_post[k]]) for k in range(num_experiments)]
     user_interface = [widgets.HBox([h_sliders[k], options[k], v_sliders[k]]) for k in range(num_experiments)]
