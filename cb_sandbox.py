@@ -5,7 +5,6 @@ import scipy.stats as sstats
 from scipy.stats import gaussian_kde as gkde
 plt.rcParams.update({'font.size': 14})
 from ipywidgets import widgets
-from ipywidgets import interactive_output
 
 def sandbox(num_samples = int(1E4), lam_bound = [3,6], lam_0=3.5, 
 t_0 = 0.1, Delta_t = 0.1, num_observations = 4, sd=1, 
@@ -167,13 +166,13 @@ def make_tabulated_sandbox(num_experiments=1):
 
     t_0 = [widgets.FloatSlider(value=0.5, continuous_update=False, 
         orientation='horizontal', disable=False,
-        min=0.1, max=2.0, step=0.1,
-        description='$t_0$ =', readout_format='.1f') for k in range(num_experiments)]
+        min=0.1, max=2.0, step=0.05,
+        description='$t_0$ =', readout_format='.2f') for k in range(num_experiments)]
 
     Delta_t = [widgets.FloatSlider(value=0.1, continuous_update=False, 
         orientation='horizontal', disable=False,
         min=0.05, max=0.5, step=0.05,
-        description='$\Delta_t$ =', readout_format='.2f') for k in range(num_experiments)]
+        description='$\Delta_t$ =', readout_format='1.2e') for k in range(num_experiments)]
 
     num_observations = [widgets.IntSlider(value=50, continuous_update=False, 
         orientation='horizontal', disable=False,
@@ -217,7 +216,7 @@ def make_tabulated_sandbox(num_experiments=1):
             'fun_choice': fun_choice[k]} for k in range(num_experiments)] 
 
     # Make all the interactive outputs for each tab and store them in a vector called out. (for output)
-    out = [interactive_output(sandbox, Keys[k]) for k in range(num_experiments)]
+    out = [widgets.interactive_output(sandbox, Keys[k]) for k in range(num_experiments)]
     
     
     ### LINK WIDGETS TOGETHER (dependent variables) ###
@@ -298,6 +297,9 @@ def make_tabulated_sandbox(num_experiments=1):
         content.layout.justify_content = 'center'
         tab_nest.children[k].children = [content]
     
-    return tab_nest
+    return tab_nest, Keys, fixed_obs_window
 
-# define wrapper function to repeat trials. 
+
+def set_prop(num_experiments, K, prop, val):
+    for k in range(num_experiments): # for each tab
+        K[k][prop].value = val
