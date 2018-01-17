@@ -101,8 +101,8 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         if compare:
             push_post_dens_kde = gkde(D[accept_inds])
             pf = push_post_dens_kde.pdf(x2)
-            ax2.plot(x2, pf/np.sum(pf))
-            plt.legend(['Observed','Recovered'])
+            ax2.plot(x2, pf/np.sum(pf), alpha=0.2)
+#             ax2.legend(['Observed','Recovered'])
         plt.title('Observed Density')
         plt.xlabel('Q(lambda)')
         
