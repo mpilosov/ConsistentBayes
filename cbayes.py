@@ -3,9 +3,23 @@ import numpy as np
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde as gkde
 
+def supported_distributions(d):
+    # currently supports 'normal' and 'uniform'
+    # both take keyword arguments `loc` and `scale` of type `np.array` or `list`
+    # method `sample_set.set_dist` just creates a handle for the chosen distribution. The longer of 
+    # `loc` and `scale` is then inferred to be the dimension, which is written to sample_set.dim
+    D = {
+        'normal': sstats.norm, 
+        'uniform': sstats.uniform,
+        }
+    try:
+        return D.get(d)
+    except KeyError:
+        print('Please specify a supported distribution. Type `?supported_distributions`'.)
+
 class sample_set:
     def __init__(self):
-        self.dim = 1 # dimension
+        self.dim = None # dimension
         self.dist = None # the distribution on the space
         self.bounds = None # bounds on the space
         self.samples = None
@@ -13,13 +27,26 @@ class sample_set:
         self.weights = None # weights for weighted KDE. If samples taken from dist, should be set to 1/N. #TODO default this
         self.seed = 0 # random number generator seed
  
-    def set_dist(self, distribution_object):
+        
+    def set_dist(self, distribution, *kwags):
+        # TODO describe how this is overloaded.
         # attach the scipy.stats._continuous_distns class to our sample set object
-        #TODO overload Type(String) to distribution_object
-        self.dist = distribution_type
-    
+        if type(distribution) is str:
+            switch distribution.lower()
+        self.dist = distribution(*kwags)
+   
+    def set_dim(self, dimension):
+        self.dim = dimension
+ 
     def generate_samples(self, num_samples = 1E3):
+        #TODO check if dimensions specified, if not, prompt user.
+        # Since we want this function to work by default, we temporarily set a default. TODO remove this behavior.
+        if self.dim is None: 
+            print('dimension unspecified. Assuming 1D')
+            self.dim = 1
         self.num_samples = num_samples
+        self.samples = self.dist.rvs(size=(num_samples, self.dim))
+
 
 class problem_set:
     def __init__(self, input_samples = None, output_samples = None):
@@ -32,6 +59,18 @@ class problem_set:
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
         self.ratio = None
 
+
+    def get_problem_dims(self):
+        if self.input.samples is not None:
+            print('Your input space is %d-dimensional'%(self.input.dim))
+            print('\t and is (%d, %d)'%(self.input.samples.shape)
+        else:
+            print('You have yet to specify an input set. Please generate a `sample_set` object and pass it to `problem_set` when instantiating the class.')
+        if self.output.samples is not None:
+            print('Your output space is %d-dimensional'%(self.output.dim))
+            print('\t and is (%d, %d)'%(self.output.samples.shape)
+        else:
+            print('You have yet to specify an output set. Please do so (either manually or with the `problem_set.mapper` module
     def compute_pushforward_dist(self):
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
