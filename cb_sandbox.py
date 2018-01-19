@@ -74,10 +74,9 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         
         # Solve the problem
         r = obs_dens.pdf(D) / pf_dens.evaluate(D) # vector of ratios evaluated at all the O(lambda)'s
-        M = 1.0 + 0*np.max(r)
+        M = np.max(r)
 
-        r = r[:,np.newaxis]
-        eta_r = r[:,0]/M
+        eta_r = r/M
         if compare or smooth_post:
             if seed == 0:
                 print('Performing Accept/Reject to estimate the pushforward of the posterior.')
