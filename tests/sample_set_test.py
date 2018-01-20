@@ -47,7 +47,7 @@ class TestSS:
 
 
     @with_setup(setup, teardown) 
-    def test_set_dist(self):
+    def test_set_dist(self): # this essentially functions as a test of assign_dist 
         print('\n========== testing sample_set.set_dist` ==========\n')
         self.S.setup()
         D = supported_distributions() # dictionary of distributions
