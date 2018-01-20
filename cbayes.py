@@ -28,6 +28,16 @@ def supported_distributions(d=None):
     else: # if d is unspecified, simply return the dictionary.
         return D
 
+
+def assign_dist(distribution='normal', *kwags):
+    # TODO describe how this is overloaded.
+    # If a string is passed, it will be matched against the options for `supported_distributions`
+    # attach the scipy.stats._continuous_distns class to our sample set object
+    if type(distribution) is str:
+        distribution = supported_distributions(distribution)
+    return distribution(*kwags)
+
+
 class sample_set:
     def __init__(self, size=(None, None)):
         # tuple `size` should be of format (num_samples, dim). 
@@ -67,16 +77,9 @@ class sample_set:
         else:
             os.error('Please specify an integer-valued `num_samples` greater than zero.')
 
- 
     def set_dist(self, distribution='normal', *kwags):
-        # TODO describe how this is overloaded.
-        # If a string is passed, it will be matched against the options for `supported_distributions`
-        # attach the scipy.stats._continuous_distns class to our sample set object
-        if type(distribution) is str:
-            distribution = supported_distributions(distribution)
-        self.dist = distribution(*kwags)
-
-
+        self.dist = assign_dist(distribution, *kwags)
+ 
     def setup(self):
         # dummy function that runs the defaults to set up an unbounded 1D problem with gaussian prior.
         self.set_dim()
@@ -101,17 +104,15 @@ class sample_set:
 
 
 class problem_set:
-    def __init__(self, input_samples = None, output_samples = None):
-        self.input = input_samples
-        self.output = output_samples
+    def __init__(self, input_set = None, output_set = None):
+        self.input = input_set
+        self.output = output_set
         self.prior_dist = self.input.dist
-        self.observed_dist = None
-        # self.pushforward_dist should actually just be a pointer to output.dist
-        #self.pushforward_dist = None # kde object. should have rvs functionality. double check sizing.
+        self.pushforward_dist = self.output.dist # kde object. should have rvs functionality. TODO: double check sizing with test.
         self.posterior_dist = None # this will be the dictionary object which we can use with .rvs(num_samples)
-
+        self.observed_dist = None
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
-        self.ratio = None
+        self.ratio = None # the ratio is the posterior density evaluated on the `input_set.samples`
 
 
     def get_problem_dims(self):
@@ -133,7 +134,6 @@ class problem_set:
     def compute_pushforward_dist(self):
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
-
         self.pushforward_dist = gkde(self.input.samples) # attach gaussian_kde object to this handle.
 
 
@@ -151,7 +151,6 @@ class problem_set:
         M = np.max(r)
         eta_r = self.ratio/M
         self.accept_inds = [i for i in range(num_samples) if eta_r[i] > np.random.rand() ] 
-
 
 ### End of `problem_set` class
 
