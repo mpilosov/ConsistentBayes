@@ -29,7 +29,7 @@ def supported_distributions(d=None):
         return D
 
 
-def assign_dist(distribution='normal', *kwags):
+def assign_dist(distribution, *kwags):
     # TODO describe how this is overloaded.
     # If a string is passed, it will be matched against the options for `supported_distributions`
     # attach the scipy.stats._continuous_distns class to our sample set object
@@ -77,7 +77,7 @@ class sample_set:
         else:
             os.error('Please specify an integer-valued `num_samples` greater than zero.')
 
-    def set_dist(self, distribution='normal', *kwags):
+    def set_dist(self, distribution='uniform', *kwags):
         self.dist = assign_dist(distribution, *kwags)
  
     def setup(self):
@@ -115,21 +115,33 @@ class problem_set:
         self.ratio = None # the ratio is the posterior density evaluated on the `input_set.samples`
 
 
-    def get_problem_dims(self):
+    def get_problem(self):
         if self.input.samples is not None:
             print('Your input space is %d-dimensional'%(self.input.dim))
             print('\t and is (%d, %d)'%(self.input.samples.shape))
+       
+            if self.output.samples is not None:
+                print('Your output space is %d-dimensional'%(self.output.dim))
+                print('\t and is (%d, %d)'%(self.output.samples.shape))
+                # If input and output are both defined, check for other necessary components.               
+                if self.pushforward_dist is None:
+                    print('WARNING: attribute `pushforward_dist` undefined. Necessary for `solve()`')
+        
+                if self.observed_dist is None:
+                    print('WARNING: attribute `observed_dist` undefined. Necessary for `solve()`')
+        
+                if self.posterior_dist is None:
+                    print('Posterior distribution is empty. Inverse Problem not yet solved.')
+        
+            else:
+                print('You have yet to specify an output set. \
+                        Please do so (either manually or with the `problem_set.mapper` module)')
+ 
         else:
             print('You have yet to specify an input set. \
                     Please generate a `sample_set` object and pass it to \
                     `problem_set` when instantiating the class.')
-        if self.output.samples is not None:
-            print('Your output space is %d-dimensional'%(self.output.dim))
-            print('\t and is (%d, %d)'%(self.output.samples.shape))
-        else:
-            print('You have yet to specify an output set. \
-                    Please do so (either manually or with the `problem_set.mapper` module)')
-
+ 
 
     def compute_pushforward_dist(self):
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
@@ -137,8 +149,10 @@ class problem_set:
         self.pushforward_dist = gkde(self.input.samples) # attach gaussian_kde object to this handle.
 
 
-    def define_observed_dist(self, distribution_object):
-        self.observed_dist = distribution_object    
+    def set_observed_dist(self, distribution, *kwags):
+        # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
+        # TODO print warning about the aforementioned.
+        self.observed_dist = assign_dist(distribution, *kwags)
 
 
     def compute_posterior_den(self):
