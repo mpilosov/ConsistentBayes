@@ -15,7 +15,7 @@ def supported_distributions(d):
     try:
         return D.get(d)
     except KeyError:
-        print('Please specify a supported distribution. Type `?supported_distributions`'.)
+        print('Please specify a supported distribution. Type `?supported_distributions`')
 
 class sample_set:
     def __init__(self):
@@ -32,7 +32,11 @@ class sample_set:
         # TODO describe how this is overloaded.
         # attach the scipy.stats._continuous_distns class to our sample set object
         if type(distribution) is str:
-            switch distribution.lower()
+            if distribution.lower() in ['normal', 'norm', 'n']:
+                distribution = sstats.norm
+            elif distribution.lower() in  ['uniform', 'uni', 'u']:
+                distribution = sstats.uniform
+
         self.dist = distribution(*kwags)
    
     def set_dim(self, dimension):
@@ -63,14 +67,14 @@ class problem_set:
     def get_problem_dims(self):
         if self.input.samples is not None:
             print('Your input space is %d-dimensional'%(self.input.dim))
-            print('\t and is (%d, %d)'%(self.input.samples.shape)
+            print('\t and is (%d, %d)'%(self.input.samples.shape))
         else:
             print('You have yet to specify an input set. Please generate a `sample_set` object and pass it to `problem_set` when instantiating the class.')
         if self.output.samples is not None:
             print('Your output space is %d-dimensional'%(self.output.dim))
-            print('\t and is (%d, %d)'%(self.output.samples.shape)
+            print('\t and is (%d, %d)'%(self.output.samples.shape))
         else:
-            print('You have yet to specify an output set. Please do so (either manually or with the `problem_set.mapper` module
+            print('You have yet to specify an output set. Please do so (either manually or with the `problem_set.mapper` module)')
     def compute_pushforward_dist(self):
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
