@@ -8,6 +8,12 @@ def supported_distributions(d):
     # both take keyword arguments `loc` and `scale` of type `np.array` or `list`
     # method `sample_set.set_dist` just creates a handle for the chosen distribution. The longer of 
     # `loc` and `scale` is then inferred to be the dimension, which is written to sample_set.dim
+    
+    if d.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
+        d = 'normal'
+    elif d.lower() in  ['uniform', 'uni', 'u']:
+        d = 'uniform'
+
     D = {
         'normal': sstats.norm, 
         'uniform': sstats.uniform,
@@ -32,11 +38,7 @@ class sample_set:
         # TODO describe how this is overloaded.
         # attach the scipy.stats._continuous_distns class to our sample set object
         if type(distribution) is str:
-            if distribution.lower() in ['normal', 'norm', 'n']:
-                distribution = sstats.norm
-            elif distribution.lower() in  ['uniform', 'uni', 'u']:
-                distribution = sstats.uniform
-
+            distribution = supported_distributions(distribution)
         self.dist = distribution(*kwags)
    
     def set_dim(self, dimension):
@@ -58,8 +60,8 @@ class problem_set:
         self.output = output_samples
         self.prior_dist = self.input.dist
         self.observed_dist = None
-        self.pushforward_dist = None
-        #self.posterior_dist = None
+        self.pushforward_dist = None # kde object. should have rvs functionality. double check sizing.
+        self.posterior_dist = None # this will be the dictionary object which we can use with .rvs(num_samples)
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
         self.ratio = None
 
