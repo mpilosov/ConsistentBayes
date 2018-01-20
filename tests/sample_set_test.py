@@ -2,7 +2,6 @@ from nose.tools import assert_equals
 from nose.tools import with_setup
 from cbayes import sample_set
 from cbayes import supported_distributions
-from scipy.stats import _continuous_distns
 from scipy.stats import _distn_infrastructure
 from os import error
 
@@ -53,7 +52,8 @@ class TestSS:
         self.S.setup()
         D = supported_distributions() # dictionary of distributions
         # test `self.S.set_dist()` with no arguments.
-        assert type(self.S.dist) is type(D['normal']())
+        # print(type(self.S.dist))
+        assert type(self.S.dist) is _distn_infrastructure.rv_frozen
         for dist_key in D.keys(): # the dist_keys are strings representing the distributions supported.
             self.S.set_dist(dist_key)
             assert type(self.S.dist) is type(D[dist_key]()) # check that it got instantiated to the expected type. 
