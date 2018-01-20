@@ -1,4 +1,6 @@
 #!/home/mpilosov/anaconda3/envs/py3/bin/python
+## Copyright 2018 Michael Pilosov
+
 import numpy as np
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde as gkde
