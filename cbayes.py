@@ -42,7 +42,10 @@ class sample_set:
         self.dist = distribution(*kwags)
    
     def set_dim(self, dimension):
-        self.dim = dimension
+        if dimension > 0:
+            self.dim = int(dimension)
+        else:
+            os.error('Please specify an integer-valued dimension greater than zero.')
  
     def generate_samples(self, num_samples = 1E3):
         #TODO check if dimensions specified, if not, prompt user.
