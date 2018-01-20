@@ -6,12 +6,14 @@ from scipy.stats import _distn_infrastructure
 from os import error
 
 
-class TestSampleSet:
+class TestSS:
  
     def setup(self):
+        # print("TestSS:setup() before each test method")
         self.S = sample_set()  # instantiate the class
 
     def teardown(self):
+        # print("TestSS:teardown() after each test method")
         self.S = None # remove it from memory in preparation for the next test.
 
     @classmethod
