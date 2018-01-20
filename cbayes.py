@@ -3,39 +3,45 @@ import numpy as np
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde as gkde
 
-def supported_distributions(d):
+def supported_distributions(d=None):
     # currently supports 'normal' and 'uniform'
     # both take keyword arguments `loc` and `scale` of type `np.array` or `list`
     # method `sample_set.set_dist` just creates a handle for the chosen distribution. The longer of 
     # `loc` and `scale` is then inferred to be the dimension, which is written to sample_set.dim
-    
-    if d.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
-        d = 'normal'
-    elif d.lower() in  ['uniform', 'uni', 'u']:
-        d = 'uniform'
 
+    # DICTIONARY OF SUPPORTED DISTRIBUTIONS:
     D = {
         'normal': sstats.norm, 
         'uniform': sstats.uniform,
         }
-    try:
-        return D.get(d)
-    except KeyError:
-        print('Please specify a supported distribution. Type `?supported_distributions`')
+
+    if d is not None: 
+        if d.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
+            d = 'normal'
+        elif d.lower() in  ['uniform', 'uni', 'u']:
+            d = 'uniform'
+
+        try:
+            return D.get(d)
+        except KeyError:
+            print('Please specify a supported distribution. Type `?supported_distributions`')
+    else: # if d is unspecified, simply return the dictionary.
+        return D
 
 class sample_set:
     def __init__(self):
         self.dim = None # dimension
-        self.dist = None # the distribution on the space
-        self.bounds = None # bounds on the space
+        self.dist = None # the distribution on the space. DEFAULT: unit normal in all dimensions.
+        #self.bounds = None # bounds on the space
         self.samples = None
-        self.num_samples = None
-        self.weights = None # weights for weighted KDE. If samples taken from dist, should be set to 1/N. #TODO default this
+        #self.num_samples = None
+        #self.weights = None # weights for weighted KDE. If samples taken from dist, should be set to 1/N. #TODO default this
         self.seed = 0 # random number generator seed
  
         
     def set_dist(self, distribution, *kwags):
         # TODO describe how this is overloaded.
+        # If a string is passed, it will be matched against the options for `supported_distributions`
         # attach the scipy.stats._continuous_distns class to our sample set object
         if type(distribution) is str:
             distribution = supported_distributions(distribution)
@@ -63,8 +69,10 @@ class problem_set:
         self.output = output_samples
         self.prior_dist = self.input.dist
         self.observed_dist = None
-        self.pushforward_dist = None # kde object. should have rvs functionality. double check sizing.
+        # self.pushforward_dist should actually just be a pointer to output.dist
+        #self.pushforward_dist = None # kde object. should have rvs functionality. double check sizing.
         self.posterior_dist = None # this will be the dictionary object which we can use with .rvs(num_samples)
+
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
         self.ratio = None
 
