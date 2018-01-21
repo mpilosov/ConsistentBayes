@@ -16,7 +16,7 @@ see the `examples/` directory for both script and jupyter-notebook files that wa
 - Dr. Troy Butler, CU Denver Dept. of Mathematics & Statistical Sciences
 - Dr. Timothy Wildey, Sandia National Laboratories
 - Dr. Scott Walsh, and
-- Michael Pilosov, MS, CU Denver Dept. of Mathematics & Statistics
+- Michael Pilosov, MS, CU Denver Dept. of Mathematics & Statistical Sciences
 
 You can find general overview in the explanations presented in the jupyter notebooks.
 For more detail, please see [this draft on arxiv](https://arxiv.org/abs/1704.00680) _in review_
