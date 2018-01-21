@@ -38,7 +38,7 @@ class TestSampleSet:
     def test_set_num_samples(self):
         print('\n========== testing `sample_set.set_num_samples` setting ==========\n')
         self.S.set_num_samples()
-        assert_equals(self.S.num_samples, 100)
+        assert_equals(self.S.num_samples, 1000)
         for i in range(100,600,100):
             self.S.set_num_samples(i)
             assert_equals(self.S.num_samples, i)

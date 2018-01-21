@@ -1,15 +1,14 @@
 #!/home/mpilosov/anaconda3/envs/py3/bin/python
 ## Copyright 2018 Michael Pilosov
 
-#import numpy as np
-from numpy import max, ndarray, random
+import numpy as np
 import scipy.stats as sstats
-from scipy.stats import gaussian_kde as gkde
+from scipy.stats import gaussian_kde
 
 
 def supported_distributions(d=None):
     # currently supports 'normal' and 'uniform'
-    # both take kwags `loc` and `scale` of type `np.array` or `list`
+    # both take kwags `loc` and `scale` of type `numpy.ndarray` or `list`
     # method `sample_set.set_dist` just creates a handle for the chosen distribution. The longer of 
     # `loc` and `scale` is then inferred to be the dimension, which is written to sample_set.dim
 
@@ -57,10 +56,10 @@ class parametric_dist: # this is supposed to mimick scipy.stats
     def args(self):
         pass
 
-class kde:
+class gkde:
     # this is basically just a wrapper around `scipy.stats.gaussian_kde` that makes it conform to our syntax.
     def __init__(self, data):
-        self.kde_object = gkde(data.transpose)
+        self.kde_object = gaussian_kde( data.transpose() )
         self.d = self.kde_object.d
         self.n = self.kde_object.n
 
@@ -68,10 +67,17 @@ class kde:
         if type(size) is tuple: 
             size=size[0]
         return self.kde_object.resample(size).transpose()
+        #TODO write a test that makes sure this returns the correct shape
     
     def pdf(self, eval_points):
-        return self.kde_object.pdf(eval_points.transpose).transpose()
+        p = self.kde_object.pdf( eval_points.transpose() ).reshape(eval_points.shape)
+        #p = self.kde_object.pdf( eval_points.transpose() ) # alternative way to do the same thing
+        #p = p[:,np.newaxis]
+        return p
+        #TODO write a test that makes sure this returns the correct shape
     
+
+
 class sample_set:
     def __init__(self, size=(None, None)):
         # tuple `size` should be of format (num_samples, dim). 
@@ -105,7 +111,7 @@ class sample_set:
             os.error('Please specify an integer-valued `dimension` greater than zero.')
     
 
-    def set_num_samples(self, num_samples=100):
+    def set_num_samples(self, num_samples=1000):
         if num_samples > 0:
             self.num_samples = int(num_samples)
         else:
@@ -123,16 +129,18 @@ class sample_set:
         self.set_dist() 
 
 
-    def generate_samples(self, num_samples = None):
+    def generate_samples(self, num_samples=None, verbose=False):
         #TODO check if dimensions specified, if not, prompt user.
         # Since we want this function to work by default, we temporarily set a default. TODO remove this behavior.
-        if self.dim is None: 
-            print('Dimension unspecified. Assuming 1D')
+        if self.dim is None:
+            if verbose: 
+                print('Dimension unspecified. Assuming 1D')
             self.dim = 1
         if num_samples is not None:
-            print("Number of samples specified. Writing this value to `sample_set.num_samples`.")
+            if verbose:
+                print("Number of samples declared, written to `sample_set.num_samples`.")
             self.num_samples = num_samples
-        
+        np.random.seed(self.seed) 
         self.samples = self.dist.rvs(size=(self.num_samples, self.dim))
         return self.samples
 
@@ -140,7 +148,7 @@ class sample_set:
 
 
 class problem:
-    def __init__(self, input_set = None, output_set = None):
+    def __init__(self, input_set=None, output_set=None, seed=None):
         self.input = input_set
         self.output = output_set
         self.prior_dist = self.input.dist
@@ -149,14 +157,19 @@ class problem:
         self.observed_dist = None
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
         self.ratio = None # the ratio is the posterior density evaluated on the `input_set.samples`
+        if seed is None:
+            self.seed = 0
+        else:
+            self.seed = seed
 
 
     def get_problem(self):
-        if self.input.samples is not None:
+        if type(self.input.samples) is __main__.sample_set:
             print('Your input space is %d-dimensional'%(self.input.dim))
             print('\t and is (%d, %d)'%(self.input.samples.shape))
        
-            if self.output.samples is not None:
+            if type(self.output.samples) is __main__.sample_set:
+                #TODO overload just a set of evaluated samples as ndarray, determine attributes and write to new output_samples
                 print('Your output space is %d-dimensional'%(self.output.dim))
                 print('\t and is (%d, %d)'%(self.output.samples.shape))
                 # If input and output are both defined, check for other necessary components.               
@@ -179,30 +192,40 @@ class problem:
                     `problem_set` when instantiating the class.')
  
 
-    def compute_pushforward_dist(self):
+    def compute_pushforward_dist(self, method=None):
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
-        self.output.dist  = kde(self.input.samples) # attach gaussian_kde object to this handle.
+        self.output.dist  = gkde(self.output.samples) # attach gaussian_kde object to this handle.
         self.pushforward_dist = self.output.dist
 
-    def set_observed_dist(self, distribution, *kwags):
+
+    def set_observed_dist(self, distribution=None, *kwags):
         # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
         # TODO print warning about the aforementioned.
-        self.observed_dist = assign_dist(distribution, *kwags)
+        # TODO check sizes, ensure dimension agreement
+        if distribution is not None:
+            self.observed_dist = assign_dist(distribution, *kwags)
+        else:
+            loc = np.mean(self.output.samples, axis=0)
+            scale = 0.5*np.std(self.output.samples, axis=0)
+            self.observed_dist = assign_dist('normal', loc, scale)
 
 
-    def compute_posterior_den(self):
-        D = self.output.samples
-        self.ratio = self.observed_dist.pdf(D) / self.pushforward_dist.pdf(D)
+    def compute_ratio(self):
+        data = self.output.samples
+        self.ratio = self.observed_dist.pdf(data) / self.pushforward_dist.pdf(data)
+        self.ratio = self.ratio.ravel()
+       
 
-
-    def perform_accept_reject(self, normalize=True, seed=None):
+    def perform_accept_reject(self, seed=None):
         # perform a standard accept/reject procedure by comparing normalized density values to u ~ Uniform[0,1]
-        M = np.max(r)
+        M = np.max(self.ratio)
         eta_r = self.ratio/M
         if seed is None:
             np.random.seed(self.seed)
-        self.accept_inds = [i for i in range(num_samples) if eta_r[i] > np.random.rand() ] 
+        else:
+            np.random.seed(seed)
+        self.accept_inds = [i for i in range(self.input.num_samples) if eta_r[i] > np.random.rand() ] 
 
 ### End of `problem_set` class
 
@@ -212,7 +235,8 @@ def map_samples_and_create_problem(input_sample_set, model):
     input_samples = input_sample_set.samples
     output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
     output_sample_set = sample_set(size=output_samples.shape)
-    pset = problem_set(input_sample_set, output_sample_set)
+    output_sample_set.samples = output_samples
+    pset = problem(input_sample_set, output_sample_set)
     return pset
 
 
