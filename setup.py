@@ -1,0 +1,22 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2018 Michael Pilosov
+
+'''
+The python script for building the ConsistentBayes package and subpackages.
+'''
+try:
+  from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+
+setup(name='cbayes',
+      version='0.2.0',
+      description='Consistent Bayesian Inversion',
+      author='Michael Pilosov',
+      author_email='mpilosov@gmail.com',
+      license='MIT',
+      url='https://github.com/mpilosov/ConsistentBayes/',
+      packages=[],
+      install_requires=['matplotlib', 'scipy',
+          'numpy', 'nose', 'ipywidgets'])
