@@ -9,7 +9,7 @@ execute `python setup.py install` in the main ConsistentBayes directory to insta
 
 You can verify that everything is working as expected by executing the unit tests using the command `nosetests`. 
 
-**Please make sure to run this before making any commits.**
+**Please make sure to run `nosetests` before making any commits.**
 
 ---
 ## Getting Started
