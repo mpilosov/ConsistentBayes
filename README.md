@@ -8,7 +8,8 @@ This library is meant to provide a straightforward implementation of the Consist
 execute `python setup.py install` in the main ConsistentBayes directory to install all dependencies.
 
 You can verify that everything is working as expected by executing the unit tests using the command `nosetests`. 
-*Please make sure to run this before making any commits.*
+
+**Please make sure to run this before making any commits.**
 
 ---
 ## Getting Started
