@@ -1,13 +1,15 @@
 #!/home/mpilosov/anaconda3/envs/py3/bin/python
 ## Copyright 2018 Michael Pilosov
 
-import numpy as np
+#import numpy as np
+from numpy import max, ndarray, random
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde as gkde
 
+
 def supported_distributions(d=None):
     # currently supports 'normal' and 'uniform'
-    # both take keyword arguments `loc` and `scale` of type `np.array` or `list`
+    # both take kwags `loc` and `scale` of type `np.array` or `list`
     # method `sample_set.set_dist` just creates a handle for the chosen distribution. The longer of 
     # `loc` and `scale` is then inferred to be the dimension, which is written to sample_set.dim
 
@@ -40,6 +42,36 @@ def assign_dist(distribution, *kwags):
     return distribution(*kwags)
 
 
+### End of re-used methods.
+class parametric_dist: # this is supposed to mimick scipy.stats
+    def __init__(self, dim):
+        self.dim = dim
+        self.distributions = {str(d): None for d in range(dim)}
+
+    def rvs(self, size = None):
+        if size is None: # if nothing specified, just generate one draw from the distribution of the RV
+            size = (self.dim, 1)
+        #TODO parse dict, hcat results.
+        pass 
+
+    def args(self):
+        pass
+
+class kde:
+    # this is basically just a wrapper around `scipy.stats.gaussian_kde` that makes it conform to our syntax.
+    def __init__(self, data):
+        self.kde_object = gkde(data.transpose)
+        self.d = self.kde_object.d
+        self.n = self.kde_object.n
+
+    def rvs(self, size=1):
+        if type(size) is tuple: 
+            size=size[0]
+        return self.kde_object.resample(size).transpose()
+    
+    def pdf(self, eval_points):
+        return self.kde_object.pdf(eval_points.transpose).transpose()
+    
 class sample_set:
     def __init__(self, size=(None, None)):
         # tuple `size` should be of format (num_samples, dim). 
@@ -79,8 +111,10 @@ class sample_set:
         else:
             os.error('Please specify an integer-valued `num_samples` greater than zero.')
 
+
     def set_dist(self, distribution='uniform', *kwags):
         self.dist = assign_dist(distribution, *kwags)
+
  
     def setup(self):
         # dummy function that runs the defaults to set up an unbounded 1D problem with gaussian prior.
@@ -105,7 +139,7 @@ class sample_set:
 ### End of `sample_set` class
 
 
-class problem_set:
+class problem:
     def __init__(self, input_set = None, output_set = None):
         self.input = input_set
         self.output = output_set
@@ -148,8 +182,8 @@ class problem_set:
     def compute_pushforward_dist(self):
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
-        self.pushforward_dist = gkde(self.input.samples) # attach gaussian_kde object to this handle.
-
+        self.output.dist  = kde(self.input.samples) # attach gaussian_kde object to this handle.
+        self.pushforward_dist = self.output.dist
 
     def set_observed_dist(self, distribution, *kwags):
         # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
@@ -162,20 +196,23 @@ class problem_set:
         self.ratio = self.observed_dist.pdf(D) / self.pushforward_dist.pdf(D)
 
 
-    def perform_accept_reject(self, normalize = True):
+    def perform_accept_reject(self, normalize=True, seed=None):
         # perform a standard accept/reject procedure by comparing normalized density values to u ~ Uniform[0,1]
         M = np.max(r)
         eta_r = self.ratio/M
+        if seed is None:
+            np.random.seed(self.seed)
         self.accept_inds = [i for i in range(num_samples) if eta_r[i] > np.random.rand() ] 
 
 ### End of `problem_set` class
 
 
-def mapper(sample_set, model):
+def map_samples_and_create_problem(input_sample_set, model):
     # pass a model, grab the input samples and map them to the data space.
-    input_samples = sample_set
-    output_samples = model(sample_set)
-    pset = problem_set(input_samples, output_samples)
+    input_samples = input_sample_set.samples
+    output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
+    output_sample_set = sample_set(size=output_samples.shape)
+    pset = problem_set(input_sample_set, output_sample_set)
     return pset
 
 
