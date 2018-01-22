@@ -7,7 +7,8 @@ This module contains the methods for solving the stochastic inverse problem:
 
 """
 
-import cbayes.sample as samp
+# import cbayes.sample as samp
+import numpy as np
 
 #: TODO add logging/warnings, save options, load options.
 # import os, logging 
