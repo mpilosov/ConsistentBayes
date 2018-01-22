@@ -126,10 +126,7 @@ class sample_set(object):
         self.samples = self.dist.rvs(size=(self.num_samples, self.dim))
         return self.samples
 
-### End of `sample_set` class
-
-
-class problem(object):
+class problem_set(object):
     r"""
     TODO: Add this.
     """
@@ -211,6 +208,18 @@ def save_sample_set():
     pass
 
 def save_sample_set():
+    r"""
+    TODO: Add this.
+    """
+    pass
+    
+def save_problem_set():
+    r"""
+    TODO: Add this.
+    """
+    pass
+
+def save_problem_set():
     r"""
     TODO: Add this.
     """

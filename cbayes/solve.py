@@ -14,7 +14,7 @@ import cbayes.sample as samp
 #: TODO add logging/warnings, save options, load options.
 # import os, logging 
 
-def compute_ratio(sample_set):
+def compute_ratio(problem_set):
     r"""
     TODO: Add description
     :param sample_set: 
@@ -25,10 +25,13 @@ def compute_ratio(sample_set):
     self.ratio = self.ratio.ravel()
    
 
-def perform_accept_reject(sample_set, seed=None):
+def perform_accept_reject(problem_set, seed=None):
     r"""
     Perform a standard accept/reject procedure by comparing 
     normalized density values to draws from Uniform[0,1]
+    
+    :param sample_set: 
+    :type sample_set: :class:`~/cbayes.sample.sample_set`
     
     :param int seed: Your seed for the accept/reject.
     
