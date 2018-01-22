@@ -9,8 +9,8 @@ This module defines the data structure classes for ConsistentBayes. They are:
 
 import numpy as np
 import os, logging
-import cbayes.distributions
-import cbayes.solve
+# import cbayes.distributions
+# import cbayes.solve
 
 #: this is for saving/loading. 
 #: TODO add glob.glob() methods with os.path.dirname/pathname
@@ -31,7 +31,7 @@ def map_samples_and_create_problem(input_sample_set, model):
     output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
     output_sample_set = sample_set(size=output_samples.shape)
     output_sample_set.samples = output_samples
-    pset = problem(input_sample_set, output_sample_set)
+    pset = problem_set(input_sample_set, output_sample_set)
     return pset
 
 class sample_set(object):
@@ -252,14 +252,3 @@ def save_problem_set():
     """
     pass
 
-def map_samples_and_create_problem(input_sample_set, model):
-    r"""
-    TODO: Add more to this.
-    pass a model, grab the input samples and map them to the data space.
-    """
-    input_samples = input_sample_set.samples
-    output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
-    output_sample_set = sample_set(size=output_samples.shape)
-    output_sample_set.samples = output_samples
-    pset = problem(input_sample_set, output_sample_set)
-    return pset
