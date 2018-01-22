@@ -1,7 +1,9 @@
-#!/home/mpilosov/anaconda3/envs/py3/bin/python
 ## Copyright (C) 2018 Michael Pilosov
+
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde
+
+
 r"""
 This module defines supported distributions and associated utility functions.
 They are as follows:

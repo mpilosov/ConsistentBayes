@@ -1,5 +1,7 @@
-#!/home/mpilosov/anaconda3/envs/py3/bin/python
 ## Copyright (C) 2018 Michael Pilosov
+
+# Michael Pilosov 01/21/2018
+
 
 r"""
 This module defines the data structure classes for ConsistentBayes. They are: 
@@ -213,8 +215,8 @@ class problem_set(object):
         :returns: ratio of observed to pushforward density evaluations
         """
         
-        ratio = problem_set.observed_dist.pdf(samples) / 
-                    problem_set.pushforward_dist.pdf(samples)
+        ratio = np.divide(problem_set.observed_dist.pdf(samples),
+                    problem_set.pushforward_dist.pdf(samples))
         ratio = ratio.ravel()
         return ratio
         

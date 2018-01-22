@@ -1,5 +1,7 @@
-#!/home/mpilosov/anaconda3/envs/py3/bin/python
 ## Copyright (C) 2018 Michael Pilosov
+
+# Michael Pilosov 01/21/2018
+
 
 r"""
 This module contains the methods for solving the stochastic inverse problem:
@@ -7,7 +9,7 @@ This module contains the methods for solving the stochastic inverse problem:
 
 """
 
-# import cbayes.sample as samp
+import cbayes.sample as samp
 import numpy as np
 
 #: TODO add logging/warnings, save options, load options.
