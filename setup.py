@@ -3,7 +3,8 @@
 # Copyright (C) 2018 Michael Pilosov
 
 '''
-The python script for building the ConsistentBayes package and subpackages.
+The python script for building the   
+ConsistentBayes package and subpackages.
 '''
 try:
   from setuptools import setup
@@ -18,5 +19,8 @@ setup(name='cbayes',
       license='MIT',
       url='https://github.com/mpilosov/ConsistentBayes/',
       packages=['cbayes'],
-      install_requires=['matplotlib', 'scipy',
-          'numpy', 'nose', 'ipywidgets'])
+      install_requires=['matplotlib', 'scipy', 'numpy', 
+                                'nose', 'os', 'logging']
+      # for future development:  
+      # install_requires=['matplotlib', 'scipy',
+      #     'numpy', 'nose', 'ipywidgets'])
