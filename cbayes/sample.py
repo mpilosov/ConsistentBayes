@@ -227,6 +227,3 @@ def map_samples_and_create_problem(input_sample_set, model):
     output_sample_set.samples = output_samples
     pset = problem(input_sample_set, output_sample_set)
     return pset
-
-
-

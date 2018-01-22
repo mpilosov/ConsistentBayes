@@ -15,7 +15,8 @@ import cbayes.sample as samp
 # import os, logging 
 
 def compute_ratio(sample_set):
-    """
+    r"""
+    TODO: Add description
     :param sample_set: 
     :type sample_set: :class:`~/cbayes.sample.sample_set`
     """
@@ -25,7 +26,7 @@ def compute_ratio(sample_set):
    
 
 def perform_accept_reject(sample_set, seed=None):
-    """
+    r"""
     Perform a standard accept/reject procedure by comparing 
     normalized density values to draws from Uniform[0,1]
     
@@ -43,5 +44,3 @@ def perform_accept_reject(sample_set, seed=None):
     self.accept_inds = [i for i in range(self.input.num_samples) if eta_r[i] > np.random.rand() ] 
 
 #: TODO ADD A LOT MORE METHODS. Weighted KDE, surrogate post, MCMC, etc.
-
-

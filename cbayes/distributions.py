@@ -129,5 +129,3 @@ class parametric_dist(object):
         TODO: Add this.
         """
         pass
-
-
