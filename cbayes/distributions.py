@@ -95,7 +95,8 @@ class gkde(object):
         :type eval_points: :class:`numpy.ndarray` of shape (num, dim)
         """
         
-        p = self.kde_object.pdf( eval_points.transpose() ).reshape(eval_points.shape)
+        p = self.kde_object.pdf( eval_points.transpose() 
+                                    ).reshape(eval_points.shape)
         #: TODO write a test that makes sure this returns the correct shape
         # alternative syntax:
         # p = self.kde_object.pdf( eval_points.transpose() ) 

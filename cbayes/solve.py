@@ -19,11 +19,15 @@ def compute_ratio(problem_set):
     TODO: Add description
     :param sample_set: 
     :type sample_set: :class:`~/cbayes.sample.sample_set`
+    
+    :rtype: :class:`numpy.ndarray` of shape(num,)
+    :returns: ratio of observed to pushforward density evaluations
     """
-    data = self.output.samples
-    self.ratio = self.observed_dist.pdf(data) / self.pushforward_dist.pdf(data)
-    self.ratio = self.ratio.ravel()
-   
+    data = problem_set.output.samples
+    ratio = problem_set.observed_dist.pdf(data) / problem_set.pushforward_dist.pdf(data)
+    ratio = ratio.ravel()
+    problem_set.ratio = ratio
+    return ratio
 
 def perform_accept_reject(problem_set, seed=None):
     r"""
@@ -38,12 +42,14 @@ def perform_accept_reject(problem_set, seed=None):
     It is encouraged that you run this multiple times when num_samples is small
     Then, average the results to get an average acceptance rate.
     """
-    M = np.max(self.ratio)
-    eta_r = self.ratio/M
+    M = np.max(problem_set.ratio)
+    eta_r = problem_set.ratio/M
     if seed is None:
-        np.random.seed(self.seed)
+        np.random.seed(problem_set.seed)
     else:
         np.random.seed(seed)
-    self.accept_inds = [i for i in range(self.input.num_samples) if eta_r[i] > np.random.rand() ] 
+    problem_set.accept_inds = [i for i in range(problem_set.input.num_samples) 
+                if eta_r[i] > np.random.rand() ] 
+    pass
 
 #: TODO ADD A LOT MORE METHODS. Weighted KDE, surrogate post, MCMC, etc.

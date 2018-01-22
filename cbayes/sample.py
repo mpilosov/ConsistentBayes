@@ -200,7 +200,34 @@ class problem_set(object):
             loc = np.mean(self.output.samples, axis=0)
             scale = 0.5*np.std(self.output.samples, axis=0)
             self.observed_dist = assign_dist('normal', loc, scale)
-
+    
+    def compute_ratio(self, samples):
+        r"""
+        Evaluates the ratio at a given set of samples 
+        These samples should be the outputs of your map.
+        
+        :param sample_set: 
+        :type sample_set: :class:`~/cbayes.sample.sample_set`
+        
+        :rtype: :class:`numpy.ndarray` of shape(num,)
+        :returns: ratio of observed to pushforward density evaluations
+        """
+        
+        ratio = problem_set.observed_dist.pdf(samples) / 
+                    problem_set.pushforward_dist.pdf(samples)
+        ratio = ratio.ravel()
+        return ratio
+        
+    def set_ratio(self):
+        r"""
+        TODO: rewrite description
+        Runs compute_ratio and stores value in place.
+        """
+        data = problem_set.output.samples
+        ratio = self.compute_ratio(data)
+        problem_set.ratio = ratio
+        pass
+        
 def save_sample_set():
     r"""
     TODO: Add this.
