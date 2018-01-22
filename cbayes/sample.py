@@ -91,14 +91,14 @@ class sample_set(object):
             self.num_samples = int(num_samples)
         else:
             os.error('Please specify an integer-valued `num_samples` greater than zero.')
-
+        pass
 
     def set_dist(self, distribution='uniform', *kwags):
         r"""
         TODO: Add this.
         """
         self.dist = distributions.assign_dist(distribution, *kwags)
-
+        pass
  
     def setup(self):
         r"""
@@ -108,7 +108,7 @@ class sample_set(object):
         self.set_dim()
         self.set_num_samples()
         self.set_dist() 
-
+        pass
 
     def generate_samples(self, num_samples=None, verbose=False):
         r"""
@@ -177,7 +177,7 @@ class problem_set(object):
             print('You have yet to specify an input set. \
                     Please generate a `sample_set` object and pass it to \
                     `problem_set` when instantiating the class.')
- 
+        pass
 
     def compute_pushforward_dist(self, method=None):
         r"""
@@ -187,7 +187,7 @@ class problem_set(object):
         # Evaluate this using pset.pushforward_den.pdf()
         self.output.dist  = distributions.gkde(self.output.samples) # attach gaussian_kde object to this handle.
         self.pushforward_dist = self.output.dist
-
+        pass
 
     def set_observed_dist(self, distribution=None, *kwags):
         r"""
@@ -202,7 +202,8 @@ class problem_set(object):
             loc = np.mean(self.output.samples, axis=0)
             scale = 0.5*np.std(self.output.samples, axis=0)
             self.observed_dist = distributions.assign_dist('normal', loc, scale)
-    
+        pass
+        
     def compute_ratio(self, samples):
         r"""
         Evaluates the ratio at a given set of samples 
@@ -227,7 +228,7 @@ class problem_set(object):
         """
         data = self.output.samples
         ratio = self.compute_ratio(data)
-        problem_set.ratio = ratio
+        self.ratio = ratio
         pass
         
 def save_sample_set():
