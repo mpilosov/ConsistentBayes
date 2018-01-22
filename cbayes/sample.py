@@ -1,85 +1,52 @@
-#!/home/mpilosov/anaconda3/envs/py3/bin/python
-## Copyright 2018 Michael Pilosov
+## Copyright (C) 2018 Michael Pilosov
+
+# Michael Pilosov 01/21/2018
+
+
+r"""
+This module defines the data structure classes for ConsistentBayes. They are: 
+    :class:`cbayes.sample.sample_set`
+    :class:`cbayes.sample.problem_set`
+"""
 
 import numpy as np
-import scipy.stats as sstats
-from scipy.stats import gaussian_kde
+import os, logging
+import cbayes.distributions as distributions
+# import cbayes.solve
 
+#: this is for saving/loading. 
+#: TODO add glob.glob() methods with os.path.dirname/pathname
+#: import glob 
+# import warnings (# what does warnings do that logging cannot?)
 
-def supported_distributions(d=None):
-    # currently supports 'normal' and 'uniform'
-    # both take kwags `loc` and `scale` of type `numpy.ndarray` or `list`
-    # method `sample_set.set_dist` just creates a handle for the chosen distribution. The longer of 
-    # `loc` and `scale` is then inferred to be the dimension, which is written to sample_set.dim
-
-    # DICTIONARY OF SUPPORTED DISTRIBUTIONS:
-    D = {
-        'normal': sstats.norm, 
-        'uniform': sstats.uniform,
-        }
-
-    if d is not None: 
-        if d.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
-            d = 'normal'
-        elif d.lower() in  ['uniform', 'uni', 'u']:
-            d = 'uniform'
-
-        try:
-            return D.get(d)
-        except KeyError:
-            print('Please specify a supported distribution. Type `?supported_distributions`')
-    else: # if d is unspecified, simply return the dictionary.
-        return D
-
-
-def assign_dist(distribution, *kwags):
-    # TODO describe how this is overloaded.
-    # If a string is passed, it will be matched against the options for `supported_distributions`
-    # attach the scipy.stats._continuous_distns class to our sample set object
-    if type(distribution) is str:
-        distribution = supported_distributions(distribution)
-    return distribution(*kwags)
-
-
-### End of re-used methods.
-class parametric_dist: # this is supposed to mimick scipy.stats
-    def __init__(self, dim):
-        self.dim = dim
-        self.distributions = {str(d): None for d in range(dim)}
-
-    def rvs(self, size = None):
-        if size is None: # if nothing specified, just generate one draw from the distribution of the RV
-            size = (self.dim, 1)
-        #TODO parse dict, hcat results.
-        pass 
-
-    def args(self):
-        pass
-
-class gkde:
-    # this is basically just a wrapper around `scipy.stats.gaussian_kde` that makes it conform to our syntax.
-    def __init__(self, data):
-        self.kde_object = gaussian_kde( data.transpose() )
-        self.d = self.kde_object.d
-        self.n = self.kde_object.n
-
-    def rvs(self, size=1):
-        if type(size) is tuple: 
-            size=size[0]
-        return self.kde_object.resample(size).transpose()
-        #TODO write a test that makes sure this returns the correct shape
+def map_samples_and_create_problem(input_sample_set, model):
+    r"""
+    TODO: full description, check type conformity
     
-    def pdf(self, eval_points):
-        p = self.kde_object.pdf( eval_points.transpose() ).reshape(eval_points.shape)
-        #p = self.kde_object.pdf( eval_points.transpose() ) # alternative way to do the same thing
-        #p = p[:,np.newaxis]
-        return p
-        #TODO write a test that makes sure this returns the correct shape
-    
+    :param input_sample_set:
+    :type input_sample_set: :class:`~cbayes.sample_set` input samples
+    """
+    # pass a model, grab the input samples and map them to the data space.
+    input_samples = input_sample_set.samples
+    if input_samples is None:
+        raise AttributeError("input_sample_set.samples cannot be None.")
+    output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
+    output_sample_set = sample_set(size=output_samples.shape)
+    output_sample_set.samples = output_samples
+    pset = problem_set(input_sample_set, output_sample_set)
+    return pset
 
+class sample_set(object):
+    def __init__(self, size=(None, None), seed=0):
+        r"""
 
-class sample_set:
-    def __init__(self, size=(None, None)):
+        Initialization
+        
+        :param size: Dimension of the space in which these samples reside.
+        :type size: :class:`numpy.ndarray` of sample values of shape (num, dim)
+        
+        :param int seed: random number generator seed
+        """
         # tuple `size` should be of format (num_samples, dim). 
         # Will write these attributes to class `sample_set`
         # If `size` is given as an integer, it is inferred to be dimension.
@@ -91,13 +58,15 @@ class sample_set:
             self.num_samples = None # used as a default. 
             # will infer/set `num_samples` from call to `generate_samples`
         else:
-            print('Please specify a valid size parameter. Defaulting to None.')
+            logging.warning('Please specify a valid size parameter. Defaulting to None.')
             self.dim = None
             self.num_samples = None
-        
+        #: dist TODO description
         self.dist = None # the distribution on the space. DEFAULT: unit normal in all dimensions.
+        #: :class:`numpy.ndarray` of samples of shape (num, dim)
         self.samples = None # this holds the actual samples we generate.
-        self.seed = 0 # random number generator seed
+        #: :param int seed: random number generator seed
+        self.seed = seed 
         
         #self.bounds = None # bounds on the space
         #self.weights = None # weights for weighted KDE. 
@@ -105,31 +74,46 @@ class sample_set:
 
   
     def set_dim(self, dimension=1):
+        r"""
+        TODO: Add this.
+        """
         if dimension > 0:
             self.dim = int(dimension)
         else:
             os.error('Please specify an integer-valued `dimension` greater than zero.')
-    
+        pass
 
     def set_num_samples(self, num_samples=1000):
+        r"""
+        TODO: Add this.
+        """
         if num_samples > 0:
             self.num_samples = int(num_samples)
         else:
             os.error('Please specify an integer-valued `num_samples` greater than zero.')
-
+        pass
 
     def set_dist(self, distribution='uniform', *kwags):
-        self.dist = assign_dist(distribution, *kwags)
-
+        r"""
+        TODO: Add this.
+        """
+        self.dist = distributions.assign_dist(distribution, *kwags)
+        pass
  
     def setup(self):
+        r"""
+        TODO: Add this.
+        """
         # dummy function that runs the defaults to set up an unbounded 1D problem with gaussian prior.
         self.set_dim()
         self.set_num_samples()
         self.set_dist() 
-
+        pass
 
     def generate_samples(self, num_samples=None, verbose=False):
+        r"""
+        TODO: Add this.
+        """
         #TODO check if dimensions specified, if not, prompt user.
         # Since we want this function to work by default, we temporarily set a default. TODO remove this behavior.
         if self.dim is None:
@@ -144,10 +128,10 @@ class sample_set:
         self.samples = self.dist.rvs(size=(self.num_samples, self.dim))
         return self.samples
 
-### End of `sample_set` class
-
-
-class problem:
+class problem_set(object):
+    r"""
+    TODO: Add this.
+    """
     def __init__(self, input_set=None, output_set=None, seed=None):
         self.input = input_set
         self.output = output_set
@@ -164,6 +148,9 @@ class problem:
 
 
     def get_problem(self):
+        r"""
+        TODO: Add this.
+        """
         if type(self.input.samples) is __main__.sample_set:
             print('Your input space is %d-dimensional'%(self.input.dim))
             print('\t and is (%d, %d)'%(self.input.samples.shape))
@@ -190,54 +177,81 @@ class problem:
             print('You have yet to specify an input set. \
                     Please generate a `sample_set` object and pass it to \
                     `problem_set` when instantiating the class.')
- 
+        pass
 
     def compute_pushforward_dist(self, method=None):
+        r"""
+        TODO: Add this.
+        """
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
-        self.output.dist  = gkde(self.output.samples) # attach gaussian_kde object to this handle.
+        self.output.dist  = distributions.gkde(self.output.samples) # attach gaussian_kde object to this handle.
         self.pushforward_dist = self.output.dist
-
+        pass
 
     def set_observed_dist(self, distribution=None, *kwags):
+        r"""
+        TODO: Add this.
+        """
         # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
         # TODO print warning about the aforementioned.
         # TODO check sizes, ensure dimension agreement
         if distribution is not None:
-            self.observed_dist = assign_dist(distribution, *kwags)
+            self.observed_dist = distributions.assign_dist(distribution, *kwags)
         else:
             loc = np.mean(self.output.samples, axis=0)
             scale = 0.5*np.std(self.output.samples, axis=0)
-            self.observed_dist = assign_dist('normal', loc, scale)
-
-
-    def compute_ratio(self):
+            self.observed_dist = distributions.assign_dist('normal', loc, scale)
+        pass
+        
+    def compute_ratio(self, samples):
+        r"""
+        Evaluates the ratio at a given set of samples 
+        These samples should be the outputs of your map.
+        
+        :param sample_set: 
+        :type sample_set: :class:`~/cbayes.sample.sample_set`
+        
+        :rtype: :class:`numpy.ndarray` of shape(num,)
+        :returns: ratio of observed to pushforward density evaluations
+        """
+        
+        ratio = np.divide(self.observed_dist.pdf(samples),
+                            self.pushforward_dist.pdf(samples))
+        ratio = ratio.ravel()
+        return ratio
+        
+    def set_ratio(self):
+        r"""
+        TODO: rewrite description
+        Runs compute_ratio and stores value in place.
+        """
         data = self.output.samples
-        self.ratio = self.observed_dist.pdf(data) / self.pushforward_dist.pdf(data)
-        self.ratio = self.ratio.ravel()
-       
+        ratio = self.compute_ratio(data)
+        self.ratio = ratio
+        pass
+        
+def save_sample_set():
+    r"""
+    TODO: Add this.
+    """
+    pass
 
-    def perform_accept_reject(self, seed=None):
-        # perform a standard accept/reject procedure by comparing normalized density values to u ~ Uniform[0,1]
-        M = np.max(self.ratio)
-        eta_r = self.ratio/M
-        if seed is None:
-            np.random.seed(self.seed)
-        else:
-            np.random.seed(seed)
-        self.accept_inds = [i for i in range(self.input.num_samples) if eta_r[i] > np.random.rand() ] 
+def save_sample_set():
+    r"""
+    TODO: Add this.
+    """
+    pass
+    
+def save_problem_set():
+    r"""
+    TODO: Add this.
+    """
+    pass
 
-### End of `problem_set` class
-
-
-def map_samples_and_create_problem(input_sample_set, model):
-    # pass a model, grab the input samples and map them to the data space.
-    input_samples = input_sample_set.samples
-    output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
-    output_sample_set = sample_set(size=output_samples.shape)
-    output_sample_set.samples = output_samples
-    pset = problem(input_sample_set, output_sample_set)
-    return pset
-
-
+def save_problem_set():
+    r"""
+    TODO: Add this.
+    """
+    pass
 
