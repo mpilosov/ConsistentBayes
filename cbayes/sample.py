@@ -1,7 +1,7 @@
 #!/home/mpilosov/anaconda3/envs/py3/bin/python
 ## Copyright (C) 2018 Michael Pilosov
 
-"""
+r"""
 This module defines the data structure classes for ConsistentBayes. They are: 
     :class:`cbayes.sample.sample_set`
     :class:`cbayes.sample.problem_set`
@@ -18,7 +18,7 @@ import cbayes.solve
 # import warnings (# what does warnings do that logging cannot?)
 
 def map_samples_and_create_problem(input_sample_set, model):
-    """
+    r"""
     TODO: full description, check type conformity
     
     :param input_sample_set:
@@ -36,7 +36,7 @@ def map_samples_and_create_problem(input_sample_set, model):
 
 class sample_set(object):
     def __init__(self, size=(None, None), seed=0):
-        """
+        r"""
 
         Initialization
         
@@ -72,7 +72,7 @@ class sample_set(object):
 
   
     def set_dim(self, dimension=1):
-        """
+        r"""
         TODO: Add this.
         """
         if dimension > 0:
@@ -82,7 +82,7 @@ class sample_set(object):
         pass
 
     def set_num_samples(self, num_samples=1000):
-        """
+        r"""
         TODO: Add this.
         """
         if num_samples > 0:
@@ -92,13 +92,16 @@ class sample_set(object):
 
 
     def set_dist(self, distribution='uniform', *kwags):
-        """
+        r"""
         TODO: Add this.
         """
         self.dist = assign_dist(distribution, *kwags)
 
  
     def setup(self):
+        r"""
+        TODO: Add this.
+        """
         # dummy function that runs the defaults to set up an unbounded 1D problem with gaussian prior.
         self.set_dim()
         self.set_num_samples()
@@ -106,6 +109,9 @@ class sample_set(object):
 
 
     def generate_samples(self, num_samples=None, verbose=False):
+        r"""
+        TODO: Add this.
+        """
         #TODO check if dimensions specified, if not, prompt user.
         # Since we want this function to work by default, we temporarily set a default. TODO remove this behavior.
         if self.dim is None:
@@ -124,6 +130,9 @@ class sample_set(object):
 
 
 class problem(object):
+    r"""
+    TODO: Add this.
+    """
     def __init__(self, input_set=None, output_set=None, seed=None):
         self.input = input_set
         self.output = output_set
@@ -140,6 +149,9 @@ class problem(object):
 
 
     def get_problem(self):
+        r"""
+        TODO: Add this.
+        """
         if type(self.input.samples) is __main__.sample_set:
             print('Your input space is %d-dimensional'%(self.input.dim))
             print('\t and is (%d, %d)'%(self.input.samples.shape))
@@ -169,6 +181,9 @@ class problem(object):
  
 
     def compute_pushforward_dist(self, method=None):
+        r"""
+        TODO: Add this.
+        """
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
         self.output.dist  = gkde(self.output.samples) # attach gaussian_kde object to this handle.
@@ -176,6 +191,9 @@ class problem(object):
 
 
     def set_observed_dist(self, distribution=None, *kwags):
+        r"""
+        TODO: Add this.
+        """
         # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
         # TODO print warning about the aforementioned.
         # TODO check sizes, ensure dimension agreement
@@ -186,38 +204,23 @@ class problem(object):
             scale = 0.5*np.std(self.output.samples, axis=0)
             self.observed_dist = assign_dist('normal', loc, scale)
 
-
-    def compute_ratio(self):
-        data = self.output.samples
-        self.ratio = self.observed_dist.pdf(data) / self.pushforward_dist.pdf(data)
-        self.ratio = self.ratio.ravel()
-       
-
-    def perform_accept_reject(self, seed=None):
-        # perform a standard accept/reject procedure by comparing normalized density values to u ~ Uniform[0,1]
-        M = np.max(self.ratio)
-        eta_r = self.ratio/M
-        if seed is None:
-            np.random.seed(self.seed)
-        else:
-            np.random.seed(seed)
-        self.accept_inds = [i for i in range(self.input.num_samples) if eta_r[i] > np.random.rand() ] 
-
-
 def save_sample_set():
-    """
+    r"""
     TODO: Add this.
     """
     pass
 
 def save_sample_set():
-    """
+    r"""
     TODO: Add this.
     """
     pass
 
 def map_samples_and_create_problem(input_sample_set, model):
-    # pass a model, grab the input samples and map them to the data space.
+    r"""
+    TODO: Add more to this.
+    pass a model, grab the input samples and map them to the data space.
+    """
     input_samples = input_sample_set.samples
     output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
     output_sample_set = sample_set(size=output_samples.shape)

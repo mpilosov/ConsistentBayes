@@ -2,7 +2,7 @@
 ## Copyright (C) 2018 Michael Pilosov
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde
-"""
+r"""
 This module defines supported distributions and associated utility functions.
 They are as follows:
     :class:`cbayes.distributions.gkde` (needs test)
@@ -12,7 +12,7 @@ They are as follows:
 """
 
 def supported_distributions(d=None):
-    """
+    r"""
     TODO flesh out description.
     currently supports 'normal' and 'uniform'
     
@@ -47,7 +47,7 @@ def supported_distributions(d=None):
         return D
 
 def assign_dist(distribution, *kwags):
-    """
+    r"""
     TODO clean up description of how this is overloaded.
     If a string is passed, it will be matched against the options for `supported_distributions`
     attach the scipy.stats._continuous_distns class to our sample set object
@@ -60,7 +60,7 @@ def assign_dist(distribution, *kwags):
     return distribution(*kwags)
 
 class gkde(object):
-    """
+    r"""
     
     Custom wrapper around `scipy.stats.gaussian_kde` to conform
     to our prefered size indexing of (num, dim). 
@@ -74,7 +74,7 @@ class gkde(object):
         self.n = self.kde_object.n
 
     def rvs(self, size=1):
-        """
+        r"""
         Generates random variables from a kde object. Wrapper function for 
         `scipy.stats.gaussian_kde.resample`.
         
@@ -87,7 +87,7 @@ class gkde(object):
         #TODO write a test that makes sure this returns the correct shape
     
     def pdf(self, eval_points):
-        """
+        r"""
         Generates random variables from a kde object. Wrapper function for 
         `scipy.stats.gaussian_kde.pdf`.
         
@@ -103,23 +103,31 @@ class gkde(object):
         return p
     
 class parametric_dist(object): 
-    """
+    r"""
+    
     TODO: add description. 
     TODO: add actual math. this is supposed to mimick scipy.stats, 
         except generalized to arbitrary mixtures, using familiar syntax 
-        that hides the complexity
+        that hides the complexity.
+        
     """
     def __init__(self, dim):
         self.dim = dim
         self.distributions = {str(d): None for d in range(dim)}
         
     def rvs(self, size = None):
+        r"""
+        TODO: Add this.
+        """
         if size is None: # if nothing specified, just generate one draw from the distribution of the RV
             size = (self.dim, 1)
         #TODO parse dict, hcat results.
         pass 
 
     def args(self): 
+        r"""
+        TODO: Add this.
+        """
         pass
 
 
