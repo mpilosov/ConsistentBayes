@@ -11,7 +11,7 @@ This module defines the data structure classes for ConsistentBayes. They are:
 
 import numpy as np
 import os, logging
-# import cbayes.distributions
+import cbayes.distributions as distributions
 # import cbayes.solve
 
 #: this is for saving/loading. 
@@ -97,7 +97,7 @@ class sample_set(object):
         r"""
         TODO: Add this.
         """
-        self.dist = assign_dist(distribution, *kwags)
+        self.dist = distributions.assign_dist(distribution, *kwags)
 
  
     def setup(self):
@@ -185,7 +185,7 @@ class problem_set(object):
         """
         # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
         # Evaluate this using pset.pushforward_den.pdf()
-        self.output.dist  = gkde(self.output.samples) # attach gaussian_kde object to this handle.
+        self.output.dist  = distributions.gkde(self.output.samples) # attach gaussian_kde object to this handle.
         self.pushforward_dist = self.output.dist
 
 
@@ -201,7 +201,7 @@ class problem_set(object):
         else:
             loc = np.mean(self.output.samples, axis=0)
             scale = 0.5*np.std(self.output.samples, axis=0)
-            self.observed_dist = assign_dist('normal', loc, scale)
+            self.observed_dist = distributions.assign_dist('normal', loc, scale)
     
     def compute_ratio(self, samples):
         r"""
@@ -215,8 +215,8 @@ class problem_set(object):
         :returns: ratio of observed to pushforward density evaluations
         """
         
-        ratio = np.divide(problem_set.observed_dist.pdf(samples),
-                    problem_set.pushforward_dist.pdf(samples))
+        ratio = np.divide(self.observed_dist.pdf(samples),
+                            self.pushforward_dist.pdf(samples))
         ratio = ratio.ravel()
         return ratio
         
@@ -225,7 +225,7 @@ class problem_set(object):
         TODO: rewrite description
         Runs compute_ratio and stores value in place.
         """
-        data = problem_set.output.samples
+        data = self.output.samples
         ratio = self.compute_ratio(data)
         problem_set.ratio = ratio
         pass
