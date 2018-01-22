@@ -9,8 +9,9 @@ This module contains the methods for solving the stochastic inverse problem:
 
 """
 
-import cbayes.sample as samp
+# import cbayes.sample as sample
 import numpy as np
+from nose import with_setup # optional
 
 #: TODO add logging/warnings, save options, load options.
 # import os, logging 
@@ -45,7 +46,7 @@ def perform_accept_reject(samples, ratios, seed=0):
 
 #: TODO ADD A LOT MORE METHODS. Weighted KDE, surrogate post, MCMC, etc.
 
-def solve(problem_set, method='AR', seed=0):
+def problem(problem_set, method='AR', seed=0):
     r"""
     This solves the inverse problem. It's a wrapper for other functions.
     
@@ -55,6 +56,8 @@ def solve(problem_set, method='AR', seed=0):
     :param str method: One of the supported methods ('AR' for accept/reject)
     """
     samples = problem_set.input.samples 
+    if problem_set.ratio is None:
+        assert ValueError("ratios not set")
     ratios = problem_set.ratio
     
     if method == 'AR':
