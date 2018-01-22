@@ -1,6 +1,7 @@
 #!/usr/bin/env python
-
 # Copyright (C) 2018 Michael Pilosov
+
+# Michael Pilosov 01/21/2018
 
 '''
 The python script for building the   
@@ -12,7 +13,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(name='cbayes',
-      version='0.2.0',
+      version='0.3.0',
       description='Consistent Bayesian Inversion',
       author='Michael Pilosov',
       author_email='mpilosov@gmail.com',
