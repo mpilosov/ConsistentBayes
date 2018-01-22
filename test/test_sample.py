@@ -136,5 +136,3 @@ class TestProblemSet:
         print('inf norm of errors over %d trials was %1.2e'%(num_tests, np.linalg.norm(err, np.inf)))
         assert np.linalg.norm(err, np.inf) < 2.5E-2
 
-
-    
