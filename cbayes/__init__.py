@@ -10,5 +10,5 @@ solve :mod:`cbayes.solve` provides various methods for solving the stochastic in
 postProcess :mod:`cbayes.postProcess` provides several plotting utilities, sorting tools, metrics, and other functionality once the posterior has been computed.
 
 """
-__all__ = ['sample', 'solve', 'postProcess']
+__all__ = ['sample', 'distributions', 'solve', 'postProcess']
 
