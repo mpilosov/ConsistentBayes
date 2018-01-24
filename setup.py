@@ -20,7 +20,5 @@ setup(name='cbayes',
       license='MIT',
       url='https://github.com/mpilosov/ConsistentBayes/',
       packages=['cbayes'],
-      install_requires=['matplotlib', 'scipy', 'numpy', 'nose'])
-      # for future development:  
-      # install_requires=['matplotlib', 'scipy',
-      #     'numpy', 'nose', 'ipywidgets'])
+      install_requires=['matplotlib', 'scipy', 'numpy', 'nose',
+           'ipykernel', 'ipywidgets'])
