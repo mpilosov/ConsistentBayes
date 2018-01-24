@@ -1,5 +1,6 @@
 ## Copyright (C) 2018 Michael Pilosov
 
+from numpy import newaxis as np_newaxis
 import scipy.stats as sstats
 from scipy.stats import gaussian_kde
 
@@ -97,12 +98,9 @@ class gkde(object):
         :type eval_points: :class:`numpy.ndarray` of shape (num, dim)
         """
         
-        p = self.kde_object.pdf( eval_points.transpose() 
-                                    ).reshape(eval_points.shape)
         #: TODO write a test that makes sure this returns the correct shape
-        # alternative syntax:
-        # p = self.kde_object.pdf( eval_points.transpose() ) 
-        # p = p[:,np.newaxis]
+        p = self.kde_object.pdf( eval_points.transpose() ) 
+        p = p[:,np_newaxis]
         return p
     
 class parametric_dist(object): 
