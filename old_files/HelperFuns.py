@@ -4,7 +4,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as sstats 
-from scipy.stats import gaussian_kde as gkde
+from scipy.stats import gaussian_kde as gauss_kde
 
 def comparepush(x, obs_dens, post_dens):
     plt.plot(x, obs_dens.pdf(x.transpose()), 'y', label='obs')
