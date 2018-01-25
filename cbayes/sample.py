@@ -51,8 +51,11 @@ class sample_set(object):
         # Will write these attributes to class `sample_set`
         # If `size` is given as an integer, it is inferred to be dimension.
         if type(size) is tuple:
-            self.num_samples = size[0] 
-            self.dim = size[1] # dimension
+            self.num_samples = size[0]
+            if len(size) == 1:
+                self.dim = 1
+            else:
+                self.dim = size[1] # dimension
         elif type(size) is int:
             self.dim = size
             self.num_samples = None # used as a default. 

@@ -31,7 +31,10 @@ def compare_input_dens(x, analytical_dens, estimated_dens, viewdim=0, lab_1='pri
     
 def compare_output_dens(x, analytical_dens, estimated_dens, viewdim=0, lab_1='observed', lab_2='KDE push', title=''):
     # specify viewdim (list) to view crosssections e.g. [0,1] gives you the diagonal view through the first two dimensions
-    dim = estimated_dens.d
+    try:
+        dim = estimated_dens.dim
+    except AttributeError:
+        dim = 1
     num_samples = len(x)
     y = np.zeros( (dim, num_samples) )
     y[viewdim,:] = x 
@@ -46,11 +49,14 @@ def compare_output_dens(x, analytical_dens, estimated_dens, viewdim=0, lab_1='ob
     plt.show()
 
 def view_analytical_dens(x, analytical_dens, viewdim=0, lab='KDE', title=''):
-    dim = analytical_dens.dim
+    try:
+        dim = analytical_dens.dim # scipy.stats multivariate
+    except AttributeError: # otherwise
+        dim = 1    
     num_samples = len(x)
-    y = np.zeros( (dim, num_samples) )
-    y[viewdim,:] = x # specify dim (list) to view crosssections e.g. [0,1] gives you the diagonal view through the first two dimensions
-    plt.plot(x, analytical_dens.pdf(y.transpose()), 'y', label=lab)
+    y = np.zeros( (num_samples, dim) )
+    y[:,viewdim] = x # specify dim (list) to view crosssections e.g. [0,1] gives you the diagonal view through the first two dimensions
+    plt.plot(x, analytical_dens.pdf(y), 'y', label=lab)
     if type(viewdim)==int:
         plt.xlabel('$\lambda_%d$'%viewdim)
     else:
@@ -89,15 +95,16 @@ def compare_est_input_dens(x, estimated_dens1, estimated_dens2, viewdim=0, lab_1
     plt.legend()
     plt.show()
     
-def pltaccept(lam, lam_accept, N, eta_r, i=0, j=1): # plots first N of accepted, any 2D marginals specified
+def pltaccept(lam, inds, N, eta_r, i=0, j=1): # plots first N of accepted, any 2D marginals specified
+    lam_accept = lam[inds,:]
     if i == j:
-        inds = [k for k in range(N+1) if lam[i,k] in lam_accept]
-        plt.scatter(lam[i,inds], eta_r[inds])
+#         inds = [k for k in range(N+1) if lam[k, i] in lam_accept]
+        plt.scatter(lam[:, i], eta_r[:])
         plt.ylabel('$\eta$')
         plt.xlabel('$\lambda_%d$'%i)
     else:
-        plt.scatter(lam[i,:], lam[j,:], s=2)
-        plt.scatter(lam_accept[i,0:N], lam_accept[j,0:N], s=4)
+#         plt.scatter(lam[:, i], lam[:, j], s=1)
+        plt.scatter(lam_accept[0:N, i], lam_accept[0:N, j], s=4)
         plt.xlabel('$\lambda_%d$'%i)
         plt.ylabel('$\lambda_%d$'%j)
         plt.show()

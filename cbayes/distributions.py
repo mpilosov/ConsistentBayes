@@ -113,7 +113,7 @@ class parametric_dist(object):
         
     """
     def __init__(self, dim):
-        self.dim = dim
+        self.dim = dim # this mimicks the scipy.stats.multivariate attribute
         self.distributions = {str(d): None for d in range(dim)}
         
     def rvs(self, size = None):

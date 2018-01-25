@@ -8,5 +8,4 @@ source activate test_py_env && python setup.py install && nosetests
 python -m ipykernel install --name test_py_env --user
 jupyter nbextension install --py --user widgetsnbextension
 jupyter nbextension enable --py widgetsnbextension
-jupyter-notebook old_file
 
