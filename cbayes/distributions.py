@@ -99,8 +99,8 @@ class gkde(object):
         """
         
         #: TODO write a test that makes sure this returns the correct shape
+        num_samples = eval_points.shape[0]
         p = self.kde_object.pdf( eval_points.transpose() ) 
-        p = p[:,np_newaxis]
         return p
     
 class parametric_dist(object): 
@@ -113,7 +113,7 @@ class parametric_dist(object):
         
     """
     def __init__(self, dim):
-        self.dim = dim
+        self.dim = dim # this mimicks the scipy.stats.multivariate attribute
         self.distributions = {str(d): None for d in range(dim)}
         
     def rvs(self, size = None):

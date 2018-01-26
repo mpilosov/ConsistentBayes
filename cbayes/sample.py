@@ -10,7 +10,7 @@ This module defines the data structure classes for ConsistentBayes. They are:
 """
 
 import numpy as np
-import os, logging
+import logging
 import cbayes.distributions as distributions
 # import cbayes.solve
 
@@ -31,6 +31,8 @@ def map_samples_and_create_problem(input_sample_set, model):
     if input_samples is None:
         raise AttributeError("input_sample_set.samples cannot be None.")
     output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
+    if len(output_samples.shape) == 1: # enfore shape parameters by force.
+        output_samples = output_samples[:, np.newaxis]
     output_sample_set = sample_set(size=output_samples.shape)
     output_sample_set.samples = output_samples
     pset = problem_set(input_sample_set, output_sample_set)
@@ -51,8 +53,11 @@ class sample_set(object):
         # Will write these attributes to class `sample_set`
         # If `size` is given as an integer, it is inferred to be dimension.
         if type(size) is tuple:
-            self.num_samples = size[0] 
-            self.dim = size[1] # dimension
+            self.num_samples = size[0]
+            if len(size) == 1:
+                self.dim = 1
+            else:
+                self.dim = size[1] # dimension
         elif type(size) is int:
             self.dim = size
             self.num_samples = None # used as a default. 
@@ -73,26 +78,39 @@ class sample_set(object):
         # If samples taken from dist, should be set to 1/N. #TODO default this
 
   
-    def set_dim(self, dimension=1):
+    def set_dim(self, dimension=None):
         r"""
         TODO: Add this.
         """
-        if dimension > 0:
-            self.dim = int(dimension)
+        if self.dim is None:
+            if dimension is not None:
+                self.dim = int(abs(dimension))
+            else:
+                self.dim = 1 # default option is self.dim not yet set.
+        elif self.dim is not None:
+            if dimension is not None:
+                self.dim = int(abs(dimension))
+            # otherwise, if nothing specified, leave it alone.
         else:
-            os.error('Please specify an integer-valued `dimension` greater than zero.')
+            assert TypeError("Please specify an integer-valued `dimension` greater than zero.")
         pass
 
-    def set_num_samples(self, num_samples=1000):
+    def set_num_samples(self, num_samples=None):
         r"""
         TODO: Add this.
         """
-        if num_samples > 0:
-            self.num_samples = int(num_samples)
+        if self.num_samples is None:
+            if num_samples is not None:
+                self.num_samples = int(abs(num_samples))
+            else:
+                self.num_samples = 1000 # default option is self.num_samples not yet set.
+        elif self.num_samples is not None:
+            if num_samples is not None:
+                self.num_samples = int(abs(num_samples))
         else:
-            os.error('Please specify an integer-valued `num_samples` greater than zero.')
+            assert TypeError("Please specify an integer-valued `num_samples` greater than zero.")
         pass
-
+        
     def set_dist(self, distribution='uniform', *kwags):
         r"""
         TODO: Add this.
@@ -110,7 +128,7 @@ class sample_set(object):
         self.set_dist() 
         pass
 
-    def generate_samples(self, num_samples=None, verbose=False):
+    def generate_samples(self, num_samples=None, verbose=True):
         r"""
         TODO: Add this.
         """
@@ -122,8 +140,13 @@ class sample_set(object):
             self.dim = 1
         if num_samples is not None:
             if verbose:
-                print("Number of samples declared, written to `sample_set.num_samples`.")
+                logging.warning("Number of samples declared, written to `sample_set.num_samples`.")
             self.num_samples = num_samples
+        else:
+            if self.num_samples is None:
+                if verbose:
+                    logging.warning("Number of samples undeclared, choosing 1000 by default.")
+                self.num_samples = 1000
         np.random.seed(self.seed) 
         self.samples = self.dist.rvs(size=(self.num_samples, self.dim))
         return self.samples
@@ -215,9 +238,13 @@ class problem_set(object):
         :rtype: :class:`numpy.ndarray` of shape(num,)
         :returns: ratio of observed to pushforward density evaluations
         """
-        
-        ratio = np.divide(self.observed_dist.pdf(samples),
-                            self.pushforward_dist.pdf(samples))
+        n = samples.shape[0]
+        try:
+            obs = self.observed_dist.pdf(samples).prod(axis=1).reshape(n)
+        except AxisError: # 1D case
+            obs = self.observed_dist.pdf(samples).reshape(n)
+        pf = self.pushforward_dist.pdf(samples).reshape(n)
+        ratio = np.divide(obs, pf)
         ratio = ratio.ravel()
         return ratio
         
