@@ -19,18 +19,18 @@ import cbayes.distributions as distributions
 #: import glob 
 # import warnings (# what does warnings do that logging cannot?)
 
-def map_samples_and_create_problem(input_sample_set, model):
+def map_samples_and_create_problem(input_sample_set, QoI_fun):
     r"""
     TODO: full description, check type conformity
     
     :param input_sample_set:
     :type input_sample_set: :class:`~cbayes.sample_set` input samples
     """
-    # pass a model, grab the input samples and map them to the data space.
+    # pass a QoI_fun, grab the input samples and map them to the data space.
     input_samples = input_sample_set.samples
     if input_samples is None:
         raise AttributeError("input_sample_set.samples cannot be None.")
-    output_samples = model(input_samples) # make sure your model conforms to size (num_samples, dim)
+    output_samples = QoI_fun(input_samples) # make sure your QoI_fun conforms to size (num_samples, dim)
     if len(output_samples.shape) == 1: # enfore shape parameters by force.
         output_samples = output_samples[:, np.newaxis]
     output_sample_set = sample_set(size=output_samples.shape)
@@ -128,7 +128,7 @@ class sample_set(object):
         self.set_dist() 
         pass
 
-    def generate_samples(self, num_samples=None, verbose=True):
+    def generate_samples(self, num_samples=None, seed=None, verbose=True):
         r"""
         TODO: Add this.
         """
@@ -147,7 +147,10 @@ class sample_set(object):
                 if verbose:
                     logging.warning("Number of samples undeclared, choosing 1000 by default.")
                 self.num_samples = 1000
-        np.random.seed(self.seed) 
+        if seed is None:
+            np.random.seed(self.seed) 
+        else:
+            np.random.seed(seed)
         self.samples = self.dist.rvs(size=(self.num_samples, self.dim))
         return self.samples
 
