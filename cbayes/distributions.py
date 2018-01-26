@@ -34,14 +34,17 @@ def supported_distributions(d=None):
     D = {
         'normal': sstats.norm, 
         'uniform': sstats.uniform,
+        'chi2': sstats.chi2,
         }
-
+    
+    # The following overloads supported keys into our dictionary of distributions.
     if d is not None: 
         if d.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
             d = 'normal'
         elif d.lower() in  ['uniform', 'uni', 'u']:
             d = 'uniform'
-
+        elif d.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
+            d = 'chi2'
         try:
             return D.get(d)
         except KeyError:
@@ -49,7 +52,7 @@ def supported_distributions(d=None):
     else: # if d is unspecified, simply return the dictionary.
         return D
 
-def assign_dist(distribution, *kwags):
+def assign_dist(distribution, *ags, **kwds):
     r"""
     TODO clean up description of how this is overloaded.
     If a string is passed, it will be matched against the options for `supported_distributions`
@@ -60,7 +63,7 @@ def assign_dist(distribution, *kwags):
     """
     if type(distribution) is str:
         distribution = supported_distributions(distribution)
-    return distribution(*kwags)
+    return distribution(*ags, **kwds)
 
 class gkde(object):
     r"""

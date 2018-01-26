@@ -7,6 +7,7 @@ plt.rcParams.update({'font.size': 14})
 from ipywidgets import widgets
 import cbayes.sample as samp
 import cbayes.solve as solve
+import logging
 
 def SSE_generator(model, obs_data, sigma=1):   # this generates a sum of squared residuals.
     def QoI_fun(inputs):         # that conforms to our desired model input
@@ -14,7 +15,6 @@ def SSE_generator(model, obs_data, sigma=1):   # this generates a sum of squared
         assert predictions.shape[1] == len(obs_data)
         residuals = predictions - obs_data
         QoI = np.sum( (residuals/sigma)**2, axis=1 )
-        print(QoI.shape)
         return QoI
     return QoI_fun
 
@@ -63,44 +63,63 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         # np.random.seed(seed)
         # Sample the Parameter Space
         S.generate_samples(seed=seed)
-        lam = S.samples.transpose()
+        lam = S.samples
         QoI_fun = SSE_generator(model, observed_data, sigma) # generates a function that just takes `lam` as input
         P = samp.map_samples_and_create_problem(S, QoI_fun)
         # Map to Data Space
         D = P.output.samples.transpose()
+        
+        P.compute_pushforward_dist() # gaussian_kde by default on the data space.
+        pf_dens = P.pushforward_dist
+        
+        P.set_observed_dist('chi2', num_observations) # define your observed distribution.
+        P.set_ratio() # compute ratio (evaluate your observed and pushforward densities)
+        
+        
     #     print('dimensions :  lambda = ' + str(lam.shape) + '   D = ' + str(D.shape) )
         # Perform KDE to estimate the pushforward
-        pf_dens = gauss_kde(D) # compute KDE estimate of it
+        # pf_dens = gauss_kde(D) # compute KDE estimate of it
+        pf_dist = P.pushforward_dist
+        
         # Specify Observed Measure - Uniform Density
-        
-        #obs_dens = sstats.uniform(0,uncertainty) # 1D only
-        obs_dens = sstats.chi2(int(num_observations))
-        
+        #obs_dist = sstats.uniform(0,uncertainty) # 1D only
+        obs_dist = P.observed_dist
+                
         # Solve the problem
-        r = obs_dens.pdf(D) / pf_dens.evaluate(D) # vector of ratios evaluated at all the O(lambda)'s
+        # r = obs_dists.pdf(D) / pf_dens.pdf(D) # vector of ratios evaluated at all the O(lambda)'s
+        
+        r = P.ratio
         M = np.max(r)
-
         eta_r = r/M
+        
         if compare or smooth_post:
             if seed == 0:
-                print('Performing Accept/Reject to estimate the pushforward of the posterior.')
-            accept_inds = [i for i in range(num_samples) if eta_r[i] > np.random.uniform(0,1) ] 
+                logging.info("""Performing Accept/Reject 
+                to estimate the pushforward of the posterior.""")
+            solve.problem(P, seed=seed)
+            accept_inds = P.accept_inds
             num_accept = len(accept_inds)
             num_accept_list.append(num_accept)
-        
-#         entropy_list.append( sstats.entropy( obs_dens.pdf(D), pf_dens.evaluate(D) ) )    
+            if num_accept < 10:
+                logging.warn(("Less than ten samples were accepted for"
+                    "`trial_seed` = %d Please increase the number of total"
+                    "samples or the standard deviation.")%seed)
+                smooth_flag = False
+            else:
+                smooth_flag = True
+#         entropy_list.append( sstats.entropy( obs_dist.pdf(D), pf_dens.pdf(D) ) )    
         
         res = 50;
         max_x = D.max();
         # Plot stuff
         # plt.figure(1)
         x1 = np.linspace(-0.25, max_x, res)
-        ax1.plot(x1, pf_dens.evaluate(x1))
+        ax1.plot(x1, pf_dens.pdf(x1))
         plt.title('Pushforward Q(Prior)')
         plt.xlabel('Q(lambda)')
         
         x2 = np.linspace(0, max_x, res)
-        ax2.plot(x2, obs_dens.pdf(x2))
+        ax2.plot(x2, obs_dist.pdf(x2))
         if compare:
             push_post_dens_kde = gauss_kde(D[accept_inds])
             pf = push_post_dens_kde.pdf(x2)
@@ -113,9 +132,10 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         x3 = np.linspace(a,b, res)
         if smooth_post:
             input_dim = lam.shape[1] # get input dimension by observing the shape of lambda
-            post_dens_kde = gauss_kde(np.array([lam[accept_inds, i] for i in range(input_dim)]))
-            ps = post_dens_kde.pdf(x3)
-            ax3.plot(x3, ps)
+            if smooth_flag:
+                post_dens_kde = gauss_kde(lam[accept_inds,:].transpose())
+                ps = post_dens_kde.pdf(x3)
+                ax3.plot(x3, ps)
             
         else:    
             ax3.scatter(lam, eta_r)

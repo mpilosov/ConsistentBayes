@@ -64,10 +64,17 @@ class TestSampleSet:
             self.S.set_dist(dist_key)
             assert type(self.S.dist) is type(D[dist_key]()) # check that it got instantiated to the expected type. 
             # now check that loc and scale were also set.
-            for (l,s) in zip(range(0,5), range(1,6)):
-                self.S.set_dist(dist_key, l, s)
-                (loc, scale) = self.S.dist.args
-                assert (loc == l and scale == s)
+            if dist_key in ['normal', 'uniform']:
+                for (l,s) in zip(range(0,5), range(1,6)):
+                    self.S.set_dist(dist_key, {'loc': l, 'scale':s})
+                    
+                    (loc, scale) = self.S.dist.args
+                    assert (loc == l and scale == s)
+            elif dist_key in ['chi2']:
+                for df in range(1,6):
+                    self.S.set_dist(dist_key, {'df': df})
+                    deg_freedom = self.S.dist.args
+                    assert df == deg_freedom
 
     @with_setup(setup, teardown) 
     def test_generate_samples(self):

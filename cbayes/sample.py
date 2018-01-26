@@ -111,11 +111,11 @@ class sample_set(object):
             assert TypeError("Please specify an integer-valued `num_samples` greater than zero.")
         pass
         
-    def set_dist(self, distribution='uniform', *kwags):
+    def set_dist(self, distribution='uniform', *ags, **kwds):
         r"""
         TODO: Add this.
         """
-        self.dist = distributions.assign_dist(distribution, *kwags)
+        self.dist = distributions.assign_dist(distribution, *ags, **kwds)
         pass
  
     def setup(self):
@@ -216,7 +216,7 @@ class problem_set(object):
         self.pushforward_dist = self.output.dist
         pass
 
-    def set_observed_dist(self, distribution=None, *kwags):
+    def set_observed_dist(self, distribution=None, *ags):
         r"""
         TODO: Add this.
         """
@@ -224,7 +224,7 @@ class problem_set(object):
         # TODO print warning about the aforementioned.
         # TODO check sizes, ensure dimension agreement
         if distribution is not None:
-            self.observed_dist = distributions.assign_dist(distribution, *kwags)
+            self.observed_dist = distributions.assign_dist(distribution, *ags)
         else:
             loc = np.mean(self.output.samples, axis=0)
             scale = 0.5*np.std(self.output.samples, axis=0)
