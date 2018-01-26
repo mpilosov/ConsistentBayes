@@ -5,6 +5,18 @@ import scipy.stats as sstats
 from scipy.stats import gaussian_kde as gauss_kde
 plt.rcParams.update({'font.size': 14})
 from ipywidgets import widgets
+import cbayes.sample as samp
+import cbayes.solve as solve
+
+def SSE_generator(model, obs_data, sigma=1):   # this generates a sum of squared residuals.
+    def QoI_fun(inputs):         # that conforms to our desired model input
+        predictions = model(inputs)
+        assert predictions.shape[1] == len(obs_data)
+        residuals = predictions - obs_data
+        QoI = np.sum( (residuals/sigma)**2, axis=1 )
+        print(QoI.shape)
+        return QoI
+    return QoI_fun
 
 def sandbox(num_samples = int(1E4), lam_bound = [3,6], lam_0=3.5, 
 t_0 = 0.1, Delta_t = 0.1, num_observations = 4, sd=1, 
@@ -15,29 +27,20 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
     np.random.seed(0) # want deterministic results
     sigma = sd*np.ones(num_observations)
     
-    if num_observations == 1:
-        print('K=0 specified, This is a single observation at t = %f.'%t_0)
-        
     t = np.linspace(t_0, t_0 + Delta_t*(num_observations-1), num_observations)
-    
-    def Q_fun(lam_0, obs_data):
-        if fun_choice == 0:
-            predictions = lam_0*np.exp(-t)
-        elif fun_choice == 1:
-            predictions = np.sin(lam_0*t)
-        else:
-            return None
-        residuals = predictions - obs_data
-        QoI = np.sum( (residuals/sigma)**2 )
-        return QoI
-        
-    # Create observations... additive noise.
     if fun_choice == 0:
-        obs_data = lam_0 * np.exp(-t) + np.random.randn(int(num_observations))*sigma
+        def model(lam):
+            return lam*np.exp(-t)
     elif fun_choice == 1:
-        obs_data = np.sin(lam_0*t) + np.random.randn(int(num_observations))*sigma
+        def model(lam):
+            return np.sin(lam*t)
+    elif fun_choice == 2:
+        def model(lam):
+            return lam*np.sin(t)
     else:
         return None
+        
+    
     # Global options - Consistent over all the trials
     plt.rcParams['figure.figsize'] = (18, 6)
     plt.close('all')
@@ -45,25 +48,26 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
     trial_seeds = [trial for trial in range(num_trials)] # seed each trial in the same numerical order
     entropy_list = []
     num_accept_list = []
+    # in the case that we fix our noise-model:
+    observed_data = model(lam_0) + np.random.randn(int(num_observations))*sigma
+    # Instantiate the sample set object.
+    S = samp.sample_set(size=(num_samples,1))
+    a, b = lam_bound
+    S.set_dist('uniform',a, b-a) # same distribution object for all
     
     for seed in trial_seeds:
-        if not fixed_noise:
+        if not fixed_noise: # if we change the noise model from run-to-run, recompute observed_data
             np.random.seed(seed)
-            if fun_choice == 0:
-                obs_data = lam_0 * np.exp(-t) + np.random.randn(int(num_observations))*sigma
-            elif fun_choice == 1:
-                obs_data = np.sin(lam_0*t) + np.random.randn(int(num_observations))*sigma
+            observed_data = model(lam_0) + np.random.randn(int(num_observations))*sigma
         
-        np.random.seed(seed)
+        # np.random.seed(seed)
         # Sample the Parameter Space
-        a, b = lam_bound
-        lam = np.random.uniform(a, b, size = (int(num_samples), 1) ) # standard uniform
-
+        S.generate_samples(seed=seed)
+        lam = S.samples.transpose()
+        QoI_fun = SSE_generator(model, observed_data, sigma) # generates a function that just takes `lam` as input
+        P = samp.map_samples_and_create_problem(S, QoI_fun)
         # Map to Data Space
-        D = np.zeros(int(num_samples))
-        for i in range(int(num_samples)):
-            D[i] = Q_fun(lam[i,:], obs_data)
-        
+        D = P.output.samples.transpose()
     #     print('dimensions :  lambda = ' + str(lam.shape) + '   D = ' + str(D.shape) )
         # Perform KDE to estimate the pushforward
         pf_dens = gauss_kde(D) # compute KDE estimate of it
