@@ -151,6 +151,7 @@ class sample_set(object):
             np.random.seed(self.seed) 
         else:
             np.random.seed(seed)
+            self.seed = seed # store the last used random seed.
         self.samples = self.dist.rvs(size=(self.num_samples, self.dim))
         return self.samples
 
