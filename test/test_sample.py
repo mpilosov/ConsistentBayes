@@ -136,3 +136,42 @@ class TestProblemSet:
         print('inf norm of errors over %d trials was %1.2e'%(num_tests, np.linalg.norm(err, np.inf)))
         assert np.linalg.norm(err, np.inf) < 2.5E-2
 
+    
+    def test_set_ratio(self):
+        r"""
+        TODO: clean up this explanation. Someone else should be able to understand it... 
+        This test uses uniform distributions. We set things up so that we expect
+        (1/2)^input_dim accepted samples as a proportion. We accomplish this 
+        with the linear map 2*np.eye(n) and uniform priors and observed dists with 
+        supports that have measure 1 in the (n-1) dimensional Lebesgue measure, 
+        giving their Radon-Nikodym Derivative (density) values of 1 as well. 
+        Thus, our posterior density evaluation is 1 * 1*(1/n) = n over its support, 
+        since the pushforward will have a support with measure n, 
+        and once again, thus densities of (1/n) since we are dealing with probability measures.
+        """
+        print('\n========== testing `sample.problem_set.set_ratio` ==========\n')
+        
+        def model(params): # dummlen(self.P.accept_inds)y model that generalizes to arbitrary dimensions
+            #return np.multiply(2,data)
+            return 2*params
+            
+        err = []
+        num_samples = 1000
+        num_tests = 50
+        
+        for dim in [1,2,3]:
+            ones = np.ones(dim)
+            S = sample.sample_set()  # instantiate the class
+            S.set_dim(dim) # just get the default setup options (x ~ U[0,1])
+            S.set_dist('uniform', 0*ones, 1*ones) 
+            S.generate_samples(num_samples)
+            
+            P = sample.map_samples_and_create_problem(S, model)
+            print('num output samples', P.output.num_samples)
+            P.compute_pushforward_dist()
+            P.set_observed_dist('uniform', 0.5*ones, 1*ones)
+            P.set_ratio()
+            print('checking size of ratio computation... shape = ', P.ratio.shape)
+            assert len(P.ratio.shape) == 1        
+            assert P.ratio.shape[0] == num_samples
+            
