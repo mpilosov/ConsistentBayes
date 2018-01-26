@@ -4,19 +4,32 @@ This library is meant to provide a straightforward implementation of the Consist
 
 --- 
 ## Installation Instructions
+Easiest way: execute `./fresh_install.sh`
+
+This will create a new python kernel for you and link it to jupyter notebook.  
+It will be called `test_py_env`. This file is a wrapper around the instructions that follow. You can activate this and have access to all the `cbayes` packages and dependencies with `source activate test_py_env`
+
 
 If you create a fresh Anaconda environment with   
 `conda create -n py3b python=3.6 -y; source activate py3b`  
-or simply using your existing python distribution (run `which python`),  
+or simply using your existing python distribution (run `which python`), you can 
 execute `python setup.py install` in the main ConsistentBayes directory to install all dependencies.
+
+You will have to link your kernel to jupyter if you want to use the notebooks.
+Additionally, if you want to use widgets (interactive workbooks with sliders), you can check the series of commands listed in the file `fresh_install.sh` to ensure you have done so correctly.
 
 You can verify that everything is working as expected by executing the unit tests using the command `nosetests`.
 
 **Please make sure to run `nosetests` before making any commits.**
 
 ---
-## Getting Started
-see the `examples/` directory for both script and jupyter-notebook files that walk you through how to solve stochastic inverse problems in the Consistent Bayesian framework, which was developed in tandem by:
+# Getting Started
+
+It is suggested that you start with the `examples/CBayes.ipynb` file.
+This notebook walks you through the method and several example files equipped with rich interactive multi-dimensional visualizations.  
+A "bare-bones" python script that carries out the same computations can be found in `examples/consistentbayes_example.py`
+
+See the `examples/` directory for both script and jupyter-notebook files that walk you through how to solve stochastic inverse problems in the Consistent Bayesian framework, which was developed in tandem by:
 - Dr. Troy Butler, CU Denver Dept. of Mathematics & Statistical Sciences
 - Dr. Timothy Wildey, Sandia National Laboratories
 - Dr. Scott Walsh, and
