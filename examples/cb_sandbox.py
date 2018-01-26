@@ -2,7 +2,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import scipy.stats as sstats
-from scipy.stats import gaussian_kde as gkde
+from scipy.stats import gaussian_kde as gauss_kde
 plt.rcParams.update({'font.size': 14})
 from ipywidgets import widgets
 
@@ -66,7 +66,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         
     #     print('dimensions :  lambda = ' + str(lam.shape) + '   D = ' + str(D.shape) )
         # Perform KDE to estimate the pushforward
-        pf_dens = gkde(D) # compute KDE estimate of it
+        pf_dens = gauss_kde(D) # compute KDE estimate of it
         # Specify Observed Measure - Uniform Density
         
         #obs_dens = sstats.uniform(0,uncertainty) # 1D only
@@ -98,7 +98,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         x2 = np.linspace(0, max_x, res)
         ax2.plot(x2, obs_dens.pdf(x2))
         if compare:
-            push_post_dens_kde = gkde(D[accept_inds])
+            push_post_dens_kde = gauss_kde(D[accept_inds])
             pf = push_post_dens_kde.pdf(x2)
             ax2.plot(x2, pf/np.sum(pf), alpha=0.2)
 #             ax2.legend(['Observed','Recovered'])
@@ -109,13 +109,13 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         x3 = np.linspace(a,b, res)
         if smooth_post:
             input_dim = lam.shape[1] # get input dimension by observing the shape of lambda
-            post_dens_kde = gkde(np.array([lam[accept_inds, i] for i in range(input_dim)]))
+            post_dens_kde = gauss_kde(np.array([lam[accept_inds, i] for i in range(input_dim)]))
             ps = post_dens_kde.pdf(x3)
             ax3.plot(x3, ps)
             
         else:    
             ax3.scatter(lam, eta_r)
-        # plt.plot(lam_accept, gkde(lam_accept))
+        # plt.plot(lam_accept, gauss_kde(lam_accept))
         plt.scatter(lam_0, 0.05)
         plt.title('Posterior Distribution') #\nof Uniform Observed Density \nwith bound = %1.2e'%uncertainty)
         plt.xlabel('Lambda')
