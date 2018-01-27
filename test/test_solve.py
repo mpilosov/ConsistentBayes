@@ -24,7 +24,7 @@ class TestSolve(object):
         self.P = None
 
     @with_setup(setup, teardown) 
-    def test_compute_ratio_and_accept_reject(self):
+    def test_accept_reject(self):
         print('\n========== testing `solve.perform_accept_reject` ==========\n')
 
         def model(params): # dummlen(self.P.accept_inds)y model that generalizes to arbitrary dimensions
@@ -40,11 +40,11 @@ class TestSolve(object):
             ones = np.ones(dim)
             S = sample.sample_set()  # instantiate the class
             S.set_dim(dim) # just get the default setup options (x ~ U[0,1])
-            S.set_dist('uniform', 0*ones, 1*ones) 
+            S.set_dist('uniform', {'loc': 0*ones, 'scale': 1*ones }) 
             S.generate_samples(num_samples)
             P = sample.map_samples_and_create_problem(S, model)
             P.compute_pushforward_dist()
-            P.set_observed_dist('uniform', 0.5*ones, 1*ones)
+            P.set_observed_dist('uniform', {'loc': 0.5*ones, 'scale': 1*ones })
             P.set_ratio()
             
             for seed in range(num_tests):
