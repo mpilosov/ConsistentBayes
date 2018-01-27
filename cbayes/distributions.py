@@ -52,7 +52,7 @@ def supported_distributions(d=None):
     else: # if d is unspecified, simply return the dictionary.
         return D
 
-def assign_dist(distribution, *ags, **kwds):
+def assign_dist(distribution, **kwds):
     r"""
     TODO clean up description of how this is overloaded.
     If a string is passed, it will be matched against the options for `supported_distributions`
@@ -63,7 +63,10 @@ def assign_dist(distribution, *ags, **kwds):
     """
     if type(distribution) is str:
         distribution = supported_distributions(distribution)
-    return distribution(*ags, **kwds)
+    if kwds is not None:
+        return distribution(**kwds)
+    else:
+        return distribution
 
 class gkde(object):
     r"""

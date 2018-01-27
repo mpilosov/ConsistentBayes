@@ -111,11 +111,16 @@ class sample_set(object):
             assert TypeError("Please specify an integer-valued `num_samples` greater than zero.")
         pass
         
-    def set_dist(self, distribution='uniform', *ags, **kwds):
+    def set_dist(self, distribution='uniform', kwds=None):
         r"""
         TODO: Add this.
         """
-        self.dist = distributions.assign_dist(distribution, *ags, **kwds)
+        if kwds is not None:
+            self.dist = distributions.assign_dist(distribution, **kwds)
+        elif (kwds is None) and (distributions.supported_distributions(distribution) is 'chi2' ):
+            raise AttributeError("If you are using a chi2 distribution, please pass `df` as a kwd.")
+        else:
+            self.dist = distributions.assign_dist(distribution)
         pass
  
     def setup(self):
@@ -216,7 +221,7 @@ class problem_set(object):
         self.pushforward_dist = self.output.dist
         pass
 
-    def set_observed_dist(self, distribution=None, *ags):
+    def set_observed_dist(self, distribution=None, kwds=None):
         r"""
         TODO: Add this.
         """
@@ -224,11 +229,14 @@ class problem_set(object):
         # TODO print warning about the aforementioned.
         # TODO check sizes, ensure dimension agreement
         if distribution is not None:
-            self.observed_dist = distributions.assign_dist(distribution, *ags)
+            if kwds is not None:
+                self.observed_dist = distributions.assign_dist(distribution, **kwds)
+            else:
+                self.observed_dist = distributions.assign_dist(distribution)
         else:
             loc = np.mean(self.output.samples, axis=0)
             scale = 0.5*np.std(self.output.samples, axis=0)
-            self.observed_dist = distributions.assign_dist('normal', loc, scale)
+            self.observed_dist = distributions.assign_dist('normal', **{'loc':loc, 'scale':scale})
         pass
         
     def compute_ratio(self, samples):
