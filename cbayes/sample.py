@@ -33,6 +33,11 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
     output_samples = QoI_fun(input_samples) # make sure your QoI_fun conforms to size (num_samples, dim)
     if len(output_samples.shape) == 1: # enfore shape parameters by force.
         output_samples = output_samples[:, np.newaxis]
+    if output_samples.shape[0] != input_samples.shape[0]: # attempt to handle 1xn arrays as nx1: 
+        logging.warn('Your model returns the wrong shape. Attempting transpose...')
+        output_samples = output_samples.transpose()
+    if output_samples.shape[0] != input_samples.shape[0]:
+        raise AssertionError("Model provided does not conform to shape requirements. Please return (n,d) `numpy.ndarray`.")
     output_sample_set = sample_set(size=output_samples.shape)
     output_sample_set.samples = output_samples
     pset = problem_set(input_sample_set, output_sample_set)
