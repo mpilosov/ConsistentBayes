@@ -237,8 +237,11 @@ class problem_set(object):
             if kwds is not None:
                 self.observed_dist = distributions.assign_dist(distribution, **kwds)
             else:
+                logging.warn(" No keywords given for distribution. Dimension cannot be inferred.")
                 self.observed_dist = distributions.assign_dist(distribution)
         else:
+            logging.warn("""No distribution specified. 
+            Defaulting to normal around data_means with 0.5*data_standard_deviation""")
             loc = np.mean(self.output.samples, axis=0)
             scale = 0.5*np.std(self.output.samples, axis=0)
             self.observed_dist = distributions.assign_dist('normal', **{'loc':loc, 'scale':scale})
