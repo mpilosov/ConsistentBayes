@@ -29,7 +29,7 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
     # pass a QoI_fun, grab the input samples and map them to the data space.
     input_samples = input_sample_set.samples
     if input_samples is None:
-        raise AttributeError("input_sample_set.samples cannot be None.")
+        raise(AttributeError(" `input_sample_set.samples` cannot be None."))
     output_samples = QoI_fun(input_samples) # make sure your QoI_fun conforms to size (num_samples, dim)
     if len(output_samples.shape) == 1: # enfore shape parameters by force.
         output_samples = output_samples[:, np.newaxis]
@@ -37,7 +37,7 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
         logging.warn('Your model returns the wrong shape. Attempting transpose...')
         output_samples = output_samples.transpose()
     if output_samples.shape[0] != input_samples.shape[0]:
-        raise AssertionError("Model provided does not conform to shape requirements. Please return (n,d) `numpy.ndarray`.")
+        raise(AssertionError(" Model provided does not conform to shape requirements. Please return (n,d) `numpy.ndarray`."))
     output_sample_set = sample_set(size=output_samples.shape)
     output_sample_set.samples = output_samples
     pset = problem_set(input_sample_set, output_sample_set)
@@ -68,7 +68,7 @@ class sample_set(object):
             self.num_samples = None # used as a default. 
             # will infer/set `num_samples` from call to `generate_samples`
         else:
-            logging.warning('Please specify a valid size parameter. Defaulting to None.')
+            logging.warning(" Please specify a valid size parameter. Defaulting to None.")
             self.dim = None
             self.num_samples = None
         #: dist TODO description
