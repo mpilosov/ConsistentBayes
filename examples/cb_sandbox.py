@@ -53,7 +53,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
     # Instantiate the sample set object.
     S = samp.sample_set(size=(num_samples,1))
     a, b = lam_bound
-    S.set_dist('uniform',a, b-a) # same distribution object for all
+    S.set_dist('uniform',{'loc':a, 'scale':b-a}) # same distribution object for all
     
     for seed in trial_seeds:
         if not fixed_noise: # if we change the noise model from run-to-run, recompute observed_data
@@ -72,7 +72,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         P.compute_pushforward_dist() # gaussian_kde by default on the data space.
         pf_dens = P.pushforward_dist
         
-        P.set_observed_dist('chi2', num_observations) # define your observed distribution.
+        P.set_observed_dist('chi2', {'df':num_observations}) # define your observed distribution.
         P.set_ratio() # compute ratio (evaluate your observed and pushforward densities)
         
         
@@ -121,9 +121,9 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         x2 = np.linspace(0, max_x, res)
         ax2.plot(x2, obs_dist.pdf(x2))
         if compare:
-            push_post_dens_kde = gauss_kde(D[accept_inds])
+            push_post_dens_kde = gauss_kde(D[:,accept_inds])
             pf = push_post_dens_kde.pdf(x2)
-            ax2.plot(x2, pf/np.sum(pf), alpha=0.2)
+            ax2.plot(x2, pf, alpha=0.2)
 #             ax2.legend(['Observed','Recovered'])
         plt.title('Observed Density')
         plt.xlabel('Q(lambda)')
