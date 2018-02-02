@@ -153,7 +153,7 @@ def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  co
             y_data_svd = new_data[:,1]
             
             sb.jointplot(x=x_data_svd, y=y_data_svd, kind='kde', 
-                         color=rgb_color, space=space, stat_func=None, label='SVD')
+                         color=rgb_color, space=space, stat_func=None)
         else:
             plt.figure()
             if inds is None:
