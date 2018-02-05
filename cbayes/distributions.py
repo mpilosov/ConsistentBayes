@@ -14,10 +14,13 @@ They are as follows:
     :method:`cbayes.distributions.assign_dist` (tested)
 """
 
-def supported_distributions(d=None):
+def supported_distributions(distname=None):
     r"""
     TODO flesh out description.
     currently supports 'normal' and 'uniform'
+    
+    :param string distname: Name of a supported distributions. 
+    If None, returns dictionary of accepted keys.
     
     rtype: :class:`scipy.stats._distn_infrastructure`
     :returns: scipy distribution object 
@@ -38,15 +41,15 @@ def supported_distributions(d=None):
         }
     
     # The following overloads supported keys into our dictionary of distributions.
-    if d is not None: 
-        if d.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
-            d = 'normal'
-        elif d.lower() in  ['uniform', 'uni', 'u']:
-            d = 'uniform'
-        elif d.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
-            d = 'chi2'
+    if distname is not None: 
+        if distname.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
+            distname = 'normal'
+        elif distname.lower() in  ['uniform', 'uni', 'u']:
+            distname = 'uniform'
+        elif distname.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
+            distname = 'chi2'
         try:
-            return D.get(d)
+            return D.get(distname)
         except KeyError:
             print('Please specify a supported distribution. Type `?supported_distributions`')
     else: # if d is unspecified, simply return the dictionary.
@@ -121,6 +124,7 @@ class parametric_dist(object):
     def __init__(self, dim):
         self.dim = dim # this mimicks the scipy.stats.multivariate attribute
         self.distributions = {str(d): None for d in range(dim)}
+        self.distlist = { str(d): None for d in range(dim) }
         
     def rvs(self, size = None):
         r"""
@@ -130,7 +134,15 @@ class parametric_dist(object):
             size = (self.dim, 1)
         #TODO parse dict, hcat results.
         pass 
-
+    
+    def fit(self, dim):
+        pass
+    
+    def setdist(self, dim, dist='normal'):
+        D = self.distlist
+        D[str(dim)] = supported_distributions(dist)
+        pass
+    
     def args(self): 
         r"""
         TODO: Add this.
