@@ -1,8 +1,8 @@
 ## Copyright (C) 2018 Michael Pilosov
 
 from numpy import newaxis as np_newaxis
+from numpy import concatenate
 import scipy.stats as sstats
-from scipy.stats import gaussian_kde
 
 
 r"""
@@ -80,7 +80,7 @@ class gkde(object):
     """
 
     def __init__(self, data):
-        self.kde_object = gaussian_kde( data.transpose() )
+        self.kde_object = sstats.gaussian_kde( data.transpose() )
         #: This is the primary difference
         self.d = self.kde_object.d
         self.n = self.kde_object.n
@@ -126,13 +126,23 @@ class parametric_dist(object):
         self.distributions = {str(d): None for d in range(dim)}
         self.distlist = { str(d): None for d in range(dim) }
         
-    def rvs(self, size = None):
+    def rvs(self, n = 1):
         r"""
         TODO: Add this.
         """
-        if size is None: # if nothing specified, just generate one draw from the distribution of the RV
-            size = (self.dim, 1)
-        #TODO parse dict, hcat results.
+        size = (n, self.dim)
+        
+        output = []
+        
+        output = numpy.concatenate
+        try:
+            obs = self.observed_dist.pdf(samples).prod(axis=1).reshape(n)
+        except AxisError: # 1D case
+            obs = self.observed_dist.pdf(samples).reshape(n)
+        pf = self.pushforward_dist.pdf(samples).reshape(n)
+        ratio = np.divide(obs, pf)
+        ratio = ratio.ravel()
+        
         pass 
     
     def fit(self, dim):
