@@ -1,7 +1,7 @@
 ## Copyright (C) 2018 Michael Pilosov
 
 from numpy import newaxis as np_newaxis
-from numpy import concatenate
+from numpy import concatenate as np_cat
 import scipy.stats as sstats
 
 
@@ -124,32 +124,31 @@ class parametric_dist(object):
     def __init__(self, dim):
         self.dim = dim # this mimicks the scipy.stats.multivariate attribute
         self.distributions = {str(d): None for d in range(dim)}
-        self.distlist = { str(d): None for d in range(dim) }
+        
         
     def rvs(self, n = 1):
         r"""
         TODO: Add this.
         """
         size = (n, self.dim)
+        D = self.distributions
         
-        output = []
-        
-        output = numpy.concatenate
-        try:
-            obs = self.observed_dist.pdf(samples).prod(axis=1).reshape(n)
-        except AxisError: # 1D case
-            obs = self.observed_dist.pdf(samples).reshape(n)
-        pf = self.pushforward_dist.pdf(samples).reshape(n)
-        ratio = np.divide(obs, pf)
-        ratio = ratio.ravel()
-        
-        pass 
+#         output = []
+        for dist in D.keys():
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+                      
+        output = np_cat( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
+        return output
     
     def fit(self, dim):
         pass
     
     def setdist(self, dim, dist='normal'):
-        D = self.distlist
+        D = self.distributions
         D[str(dim)] = supported_distributions(dist)
         pass
     

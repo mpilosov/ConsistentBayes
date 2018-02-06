@@ -148,7 +148,7 @@ def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  co
             offset = np.mean(data_subset, axis=0)
             la = data_subset - np.array(offset)
             U,S,V = np.linalg.svd(la)
-            new_data = np.dot(V,la.transpose()).transpose() + offset
+            new_data = np.dot(V, la.transpose()).transpose() + offset
             x_data_svd = new_data[:,0]
             y_data_svd = new_data[:,1]
             
