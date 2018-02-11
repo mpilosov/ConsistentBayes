@@ -136,7 +136,6 @@ class parametric_dist(object):
         size = (n, self.dim)
         D = self.distributions
         
-#         output = []
         for dist in D.keys():
             try:
                 assert(D[dist] is not None)
@@ -147,8 +146,21 @@ class parametric_dist(object):
         output = np_cat( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
         return output
     
-    def pdf(self, samples):
-        pass
+    def pdf(self, eval_points):
+        size = (n, self.dim)
+        D = self.distributions
+        
+        for dist in D.keys():
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+        output = np_cat( [ D[dist].pdf(eval_points) for dist in D.keys() ], axis=1)
+        return np.product(output, axis=1)
+
+    def evaluate(self, eval_points):
+        return self.pdf(eval_points)
 
     def fit(self, dim):
         pass
