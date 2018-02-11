@@ -49,7 +49,7 @@ def supported_distributions(distname=None):
             distname = 'uniform'
         elif distname.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
             distname = 'chi2'
-        elif distname.lower() in ['beta', 'bt', 'b'] 
+        elif distname.lower() in ['beta', 'bt', 'b']:
             distname = 'beta'
         try:
             return D[distname]
@@ -153,14 +153,14 @@ class parametric_dist(object):
     def fit(self, dim):
         pass
     
-    def setdist(self, dim, dist='normal', kwds=None):
+    def set_dist(self, dim, dist='normal', kwds=None):
         D = self.distributions
         if kwds is not None:
             D[str(dim)] = assign_dist(dist, **kwds)
         else:
             D[str(dim)] = assign_dist(dist)
         pass
-    
+
     def args(self): 
         r"""
         TODO: Add this.
