@@ -125,7 +125,7 @@ class sample_set(object):
         TODO: Add this.
         """
         if (kwds is not None) and (dim is not None):
-            self.dist.set_dist(dim, distribution, **kwds)
+            self.dist.set_dist(dim, distribution, kwds)
         elif (kwds is None) and (dim is not None):
             self.dist.set_dist(dim, distribution)
 

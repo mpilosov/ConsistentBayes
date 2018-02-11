@@ -128,13 +128,17 @@ class parametric_dist(object):
         self.distributions = {str(d): None for d in range(dim)}
         
         
-    def rvs(self, n = 1):
+    def rvs(self, size=None):
         r"""
         TODO: Add this.
         """
-        size = (n, self.dim)
         D = self.distributions
-        
+        if type(size) is tuple:
+            assert(size[1] == len(D)) # make sure the dimensions are correc
+            n = size[0]
+        else:
+            n = size
+
         for dist in D.keys():
             try:
                 assert(D[dist] is not None)
