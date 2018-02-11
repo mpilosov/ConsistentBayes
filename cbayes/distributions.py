@@ -1,7 +1,6 @@
 ## Copyright (C) 2018 Michael Pilosov
 
-from numpy import newaxis as np_newaxis
-from numpy import concatenate as np_cat
+import numpy as np
 import scipy.stats as sstats
 
 
@@ -143,21 +142,29 @@ class parametric_dist(object):
                 raise(ValueError("""
                 You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
                       
-        output = np_cat( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
+        output = np.concatenate( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
         return output
     
     def pdf(self, eval_points):
-        size = (n, self.dim)
+        size = eval_points.shape
+        try:
+            dim = size[1]
+        except IndexError:
+            dim = 0
+            if len(D.keys) != 1:
+                raise(IndexError("Could not infer dimensions. `eval_points` has the wrong shape."))
+        n = size[0]
+        eval_points = eval_points.reshape(n, dim)
         D = self.distributions
-        
-        for dist in D.keys():
+        output = np.ones(n)
+        for ind, dist in enumerate(D.keys()):
             try:
                 assert(D[dist] is not None)
             except AssertionError:
                 raise(ValueError("""
-                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
-        output = np_cat( [ D[dist].pdf(eval_points) for dist in D.keys() ], axis=1)
-        return np.product(output, axis=1)
+                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))    
+            output *= D[dist].pdf( eval_points[:,ind] )
+        return output
 
     def evaluate(self, eval_points):
         return self.pdf(eval_points)
