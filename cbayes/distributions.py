@@ -49,7 +49,7 @@ def supported_distributions(distname=None):
         elif distname.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
             distname = 'chi2'
         try:
-            return D.get(distname)
+            return D[distname]
         except KeyError:
             print('Please specify a supported distribution. Type `?supported_distributions`')
     else: # if d is unspecified, simply return the dictionary.
