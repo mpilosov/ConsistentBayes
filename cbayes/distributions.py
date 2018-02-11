@@ -38,6 +38,7 @@ def supported_distributions(distname=None):
         'normal': sstats.norm, 
         'uniform': sstats.uniform,
         'chi2': sstats.chi2,
+        'beta': sstats.beta
         }
     
     # The following overloads supported keys into our dictionary of distributions.
@@ -48,6 +49,8 @@ def supported_distributions(distname=None):
             distname = 'uniform'
         elif distname.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
             distname = 'chi2'
+        elif distname.lower() in ['beta', 'bt', 'b'] 
+            distname = 'beta'
         try:
             return D[distname]
         except KeyError:
@@ -144,12 +147,18 @@ class parametric_dist(object):
         output = np_cat( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
         return output
     
+    def pdf(self, samples):
+        pass
+
     def fit(self, dim):
         pass
     
-    def setdist(self, dim, dist='normal'):
+    def setdist(self, dim, dist='normal', kwds=None):
         D = self.distributions
-        D[str(dim)] = supported_distributions(dist)
+        if kwds is not None:
+            D[str(dim)] = assign_dist(dist, **kwds)
+        else:
+            D[str(dim)] = assign_dist(dist)
         pass
     
     def args(self): 
