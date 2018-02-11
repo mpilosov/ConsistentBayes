@@ -147,15 +147,15 @@ class parametric_dist(object):
     
     def pdf(self, eval_points):
         size = eval_points.shape
+        D = self.distributions
         try:
             dim = size[1]
         except IndexError:
-            dim = 0
-            if len(D.keys) != 1:
+            dim = 1 
+            if len(D) != dim:
                 raise(IndexError("Could not infer dimensions. `eval_points` has the wrong shape."))
         n = size[0]
         eval_points = eval_points.reshape(n, dim)
-        D = self.distributions
         output = np.ones(n)
         for ind, dist in enumerate(D.keys()):
             try:
