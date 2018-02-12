@@ -7,6 +7,65 @@ import seaborn as sb
 import scipy.stats as sstats 
 from scipy.stats import gaussian_kde as gauss_kde
 
+
+def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  color="eggplant", space=0.05, svd=False): # plots first N of accepted, any 2D marginals specified
+    if type(data) is np.ndarray:
+
+        if inds is not None:
+            data_subset = data[inds,:]
+        else:
+            data_subset = data
+        if N is not None:
+            data_subset = data_subset[0:N]
+    else:
+        try: # try to infer the dimension... 
+            d = len(data.rvs())
+        except TypeError:
+            try:
+                d = data.rvs().shape[1]
+            except IndexError:
+                d = 1
+        data = data.rvs((N,d)) # if we get a distribution object, use it to generate samples.  
+        data_subset = data 
+    x_data = data_subset[:, view_dim_1]
+    try:
+        y_data = data_subset[:, view_dim_2]
+    except IndexError:
+        y_data = x_data
+    rgb_color = sb.xkcd_rgb[color]
+
+    if view_dim_1 == view_dim_2:
+        sb.kdeplot(x_data, color=rgb_color)
+        if eta_r is not None:
+            plt.figure()
+            plt.scatter(data[:,view_dim_1], eta_r, alpha=0.1, color=rgb_color)
+    else:
+            # perform SVD and show secondary plot
+        if svd:
+            offset = np.mean(data_subset, axis=0)
+            la = data_subset - np.array(offset)
+            U,S,V = np.linalg.svd(la)
+            new_data = np.dot(V, la.transpose()).transpose() + offset
+            x_data_svd = new_data[:,0]
+            y_data_svd = new_data[:,1]
+            
+            sb.jointplot(x=x_data_svd, y=y_data_svd, kind='kde', 
+                         color=rgb_color, space=space, stat_func=None)
+        
+        else: # no SVD - show scatter plot
+            plt.figure()
+            if inds is None:
+                plt.scatter(data[0:N,view_dim_1], data[0:N,view_dim_2], alpha=0.2, color=rgb_color)
+                
+            else:
+                plt.scatter(data[inds[0:N],view_dim_1], data[inds[0:N],view_dim_2], alpha=0.2)
+                # plt.axis('equal')
+        sb.jointplot(x=x_data, y=y_data, kind='kde', 
+                     color=rgb_color, space=space, stat_func=None)
+        
+    plt.show()
+
+
 def comparepush(x, obs_dens, post_dens):
     plt.plot(x, obs_dens.pdf(x.transpose()), 'y', label='obs')
     plt.plot(x, post_dens.evaluate(x), 'c', label='$O(post)')
@@ -76,7 +135,7 @@ def view_analytical_dens(x, analytical_dens, viewdim=0, title=''):
     plt.title(title)
     # plt.legend()
     plt.show()
- 
+
 
 def view_est_dens(x, estimated_dens, viewdim=0, lab='KDE', title=''):
     dim = estimated_dens.d
@@ -91,7 +150,7 @@ def view_est_dens(x, estimated_dens, viewdim=0, lab='KDE', title=''):
     plt.title(title)
     plt.legend()
     plt.show()
- 
+
 def compare_est_input_dens(x, estimated_dens1, estimated_dens2, viewdim=0, lab_1='KDE prior', lab_2='KDE post', title=''):
     input_dim = estimated_dens1.d
     num_samples = len(x)
@@ -108,64 +167,9 @@ def compare_est_input_dens(x, estimated_dens1, estimated_dens2, viewdim=0, lab_1
     plt.title(title)
     plt.legend()
     plt.show()
- 
 
 
-def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  color="eggplant", space=0.05, svd=False): # plots first N of accepted, any 2D marginals specified
-    if type(data) is np.ndarray:
 
-        if inds is not None:
-            data_subset = data[inds,:]
-        else:
-            data_subset = data
-        if N is not None:
-            data_subset = data_subset[0:N]
-    else:
-        try: # try to infer the dimension... 
-            d = len(data.rvs())
-        except TypeError:
-            try:
-                d = data.rvs().shape[1]
-            except IndexError:
-                d = 1
-        data = data.rvs((N,d)) # if we get a distribution object, use it to generate samples.  
-        data_subset = data 
-    x_data = data_subset[:, view_dim_1]
-    try:
-        y_data = data_subset[:, view_dim_2]
-    except IndexError:
-        y_data = x_data
-    rgb_color = sb.xkcd_rgb[color]
-
-    if view_dim_1 == view_dim_2:
-        sb.kdeplot(x_data, color=rgb_color)
-        if eta_r is not None:
-            plt.figure()
-            plt.scatter(data[:,view_dim_1], eta_r, alpha=0.1, color=rgb_color)
-    else:
-            # perform SVD and show secondary plot
-        if svd:
-            offset = np.mean(data_subset, axis=0)
-            la = data_subset - np.array(offset)
-            U,S,V = np.linalg.svd(la)
-            new_data = np.dot(V,la.transpose()).transpose() + offset
-            x_data_svd = new_data[:,0]
-            y_data_svd = new_data[:,1]
-            
-            sb.jointplot(x=x_data_svd, y=y_data_svd, kind='kde', 
-                         color=rgb_color, space=space, stat_func=None)
-        else:
-            plt.figure()
-            if inds is None:
-                plt.scatter(data[0:N,view_dim_1], data[0:N,view_dim_2], alpha=0.2, color=rgb_color)
-                
-            else:
-                plt.scatter(data[inds[0:N],view_dim_1], data[inds[0:N],view_dim_2], alpha=0.2)
-                plt.axis('equal')
-        sb.jointplot(x=x_data, y=y_data, kind='kde', 
-                     color=rgb_color, space=space, stat_func=None)
-        
-    plt.show()
     
  
 

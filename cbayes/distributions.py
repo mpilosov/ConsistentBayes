@@ -1,8 +1,7 @@
 ## Copyright (C) 2018 Michael Pilosov
 
-from numpy import newaxis as np_newaxis
+import numpy as np
 import scipy.stats as sstats
-from scipy.stats import gaussian_kde
 
 
 r"""
@@ -14,10 +13,13 @@ They are as follows:
     :method:`cbayes.distributions.assign_dist` (tested)
 """
 
-def supported_distributions(d=None):
+def supported_distributions(distname=None):
     r"""
     TODO flesh out description.
     currently supports 'normal' and 'uniform'
+    
+    :param string distname: Name of a supported distributions. 
+    If None, returns dictionary of accepted keys.
     
     rtype: :class:`scipy.stats._distn_infrastructure`
     :returns: scipy distribution object 
@@ -35,18 +37,21 @@ def supported_distributions(d=None):
         'normal': sstats.norm, 
         'uniform': sstats.uniform,
         'chi2': sstats.chi2,
+        'beta': sstats.beta
         }
     
     # The following overloads supported keys into our dictionary of distributions.
-    if d is not None: 
-        if d.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
-            d = 'normal'
-        elif d.lower() in  ['uniform', 'uni', 'u']:
-            d = 'uniform'
-        elif d.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
-            d = 'chi2'
+    if distname is not None: 
+        if distname.lower() in ['gaussian', 'gauss', 'normal', 'norm', 'n']:
+            distname = 'normal'
+        elif distname.lower() in  ['uniform', 'uni', 'u']:
+            distname = 'uniform'
+        elif distname.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
+            distname = 'chi2'
+        elif distname.lower() in ['beta', 'bt', 'b']:
+            distname = 'beta'
         try:
-            return D.get(d)
+            return D[distname]
         except KeyError:
             print('Please specify a supported distribution. Type `?supported_distributions`')
     else: # if d is unspecified, simply return the dictionary.
@@ -77,7 +82,7 @@ class gkde(object):
     """
 
     def __init__(self, data):
-        self.kde_object = gaussian_kde( data.transpose() )
+        self.kde_object = sstats.gaussian_kde( data.transpose() )
         #: This is the primary difference
         self.d = self.kde_object.d
         self.n = self.kde_object.n
@@ -122,14 +127,62 @@ class parametric_dist(object):
         self.dim = dim # this mimicks the scipy.stats.multivariate attribute
         self.distributions = {str(d): None for d in range(dim)}
         
-    def rvs(self, size = None):
+        
+    def rvs(self, size=None):
         r"""
         TODO: Add this.
         """
-        if size is None: # if nothing specified, just generate one draw from the distribution of the RV
-            size = (self.dim, 1)
-        #TODO parse dict, hcat results.
-        pass 
+        D = self.distributions
+        if type(size) is tuple:
+            assert(size[1] == len(D)) # make sure the dimensions are correc
+            n = size[0]
+        else:
+            n = size
+
+        for dist in D.keys():
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+                      
+        output = np.concatenate( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
+        return output
+    
+    def pdf(self, eval_points):
+        size = eval_points.shape
+        D = self.distributions
+        try:
+            dim = size[1]
+        except IndexError:
+            dim = 1 
+            if len(D) != dim:
+                raise(IndexError("Could not infer dimensions. `eval_points` has the wrong shape."))
+        n = size[0]
+        eval_points = eval_points.reshape(n, dim)
+        output = np.ones(n)
+        for ind, dist in enumerate(D.keys()):
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))    
+            output *= D[dist].pdf( eval_points[:,ind] )
+        return output
+
+    def evaluate(self, eval_points):
+        return self.pdf(eval_points)
+
+    def fit(self, dim):
+        pass
+    
+    def set_dist(self, dim, dist='normal', kwds=None):
+        D = self.distributions
+        if kwds is not None:
+            D[str(dim)] = assign_dist(dist, **kwds)
+        else:
+            D[str(dim)] = assign_dist(dist)
+        pass
 
     def args(self): 
         r"""

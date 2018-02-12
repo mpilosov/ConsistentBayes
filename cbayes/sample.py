@@ -72,7 +72,10 @@ class sample_set(object):
             self.dim = None
             self.num_samples = None
         #: dist TODO description
-        self.dist = None # the distribution on the space. DEFAULT: unit normal in all dimensions.
+        if self.dim is not None:
+            self.dist = distributions.parametric_dist(self.dim)
+        else:
+            self.dist = None
         #: :class:`numpy.ndarray` of samples of shape (num, dim)
         self.samples = None # this holds the actual samples we generate.
         #: :param int seed: random number generator seed
@@ -98,6 +101,7 @@ class sample_set(object):
             # otherwise, if nothing specified, leave it alone.
         else:
             assert TypeError("Please specify an integer-valued `dimension` greater than zero.")
+        self.dist = distributions.parametric_dist(self.dim)
         pass
 
     def set_num_samples(self, num_samples=None):
@@ -116,16 +120,28 @@ class sample_set(object):
             assert TypeError("Please specify an integer-valued `num_samples` greater than zero.")
         pass
         
-    def set_dist(self, distribution='uniform', kwds=None):
+    def set_dist(self, distribution='uniform', kwds=None, dim=None):
         r"""
         TODO: Add this.
         """
-        if kwds is not None:
-            self.dist = distributions.assign_dist(distribution, **kwds)
+        if (kwds is not None) and (dim is not None):
+            self.dist.set_dist(dim, distribution, kwds)
+        elif (kwds is None) and (dim is not None):
+            self.dist.set_dist(dim, distribution)
+
+        # Here we override the default errors printed by scipy.stats with our own.
         elif (kwds is None) and (distributions.supported_distributions(distribution) is 'chi2' ):
-            raise AttributeError("If you are using a chi2 distribution, please pass `df` as a kwd.")
-        else:
-            self.dist = distributions.assign_dist(distribution)
+            raise(AttributeError("If you are using a chi2 distribution, please pass `df` as a key-value pair in a dictionary. Ex: {'df': 20}."))
+        elif (kwds is None) and (distributions.supported_distributions(distribution) is 'beta'):
+            raise(AttributeError("If you are using a Beta dist, please pass `a` and `b` as key-value pairs in a dictionary. Ex: {'a': 1, 'b': 1}"))
+        # the following allows for manual overrides not using the parametric object.
+        # e.g. kwds = {'loc': [1,2,3]}
+        elif dim is None:
+            logging.warn("No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like .pdf may not work as expected.")
+            if kwds is not None:
+                self.dist = distributions.assign_dist(distribution, **kwds)
+            else: 
+                self.dist = distributions.assign_dist(distribution)
         pass
  
     def setup(self):
