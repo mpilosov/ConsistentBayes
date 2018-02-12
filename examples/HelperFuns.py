@@ -60,6 +60,12 @@ def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  co
             else:
                 plt.scatter(data[inds[0:N],view_dim_1], data[inds[0:N],view_dim_2], alpha=0.2)
                 # plt.axis('equal')
+                min_1 = np.min(data[:,view_dim_1])
+                min_2 = np.min(data[:,view_dim_2])
+                max_1 = np.max(data[:,view_dim_1])
+                max_2 = np.max(data[:,view_dim_2])
+                plt.xlim([min_1, max_1])
+                plt.ylim([min_2, max_2])
         sb.jointplot(x=x_data, y=y_data, kind='kde', 
                      color=rgb_color, space=space, stat_func=None)
         
