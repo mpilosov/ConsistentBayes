@@ -194,6 +194,7 @@ class problem_set(object):
         self.observed_dist = None
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
         self.ratio = None # the ratio is the posterior density evaluated on the `input_set.samples`
+        self.pf_pr_eval = None
         if seed is None:
             self.seed = 0
         else:
@@ -262,6 +263,17 @@ class problem_set(object):
             scale = 0.5*np.std(self.output.samples, axis=0)
             self.observed_dist = distributions.assign_dist('normal', **{'loc':loc, 'scale':scale})
         pass
+    
+    def eval_pf_prior(self):
+        r"""
+        TODO
+        """
+        if self.pushforward_dist is None:
+            raise(AttributeError("You are missing a defined pushforward distribution"))
+        else:
+            pf = self.pushforward_dist.pdf(self.output.samples).reshape(self.output.num_samples)
+            self.pf_pr_eval = pf
+        return pf
         
     def compute_ratio(self, samples):
         r"""
@@ -279,7 +291,15 @@ class problem_set(object):
             obs = self.observed_dist.pdf(samples).prod(axis=1).reshape(n)
         except AxisError: # 1D case
             obs = self.observed_dist.pdf(samples).reshape(n)
-        pf = self.pushforward_dist.pdf(samples).reshape(n)
+        
+        if np.allclose(samples, self.output.samples): # if you are asking for evaluation of the prior
+            if self.pf_pr_eval is not None:
+                pf = self.pf_pr_eval
+            else: # if it hasn't been previously computed before, store it.
+                pf = self.eval_pf_prior()
+        else: # if you are asking for a different set of output samples to be evaluated,
+            pf = self.pushforward_dist.pdf(samples).reshape(n)
+        
         ratio = np.divide(obs, pf)
         ratio = ratio.ravel()
         return ratio
