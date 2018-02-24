@@ -191,7 +191,12 @@ class problem_set(object):
         self.prior_dist = self.input.dist
         self.pushforward_dist = self.output.dist # kde object. should have rvs functionality. TODO: double check sizing with test.
         self.posterior_dist = None # this will be the dictionary object which we can use with .rvs(num_samples)
-        self.observed_dist = None
+        
+        if self.output.dim is not None:
+            self.observed_dist = distributions.parametric_dist(self.output.dim)
+        else:
+            self.observed_dist = None
+
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
         self.ratio = None # the ratio is the posterior density evaluated on the `input_set.samples`
         self.pf_pr_eval = None
@@ -243,13 +248,18 @@ class problem_set(object):
         self.pushforward_dist = self.output.dist
         pass
 
-    def set_observed_dist(self, distribution=None, kwds=None):
+    def set_observed_dist(self, distribution=None, kwds=None, dim=None):
         r"""
         TODO: Add this.
         """
         # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
         # TODO print warning about the aforementioned.
         # TODO check sizes, ensure dimension agreement
+        if (kwds is not None) and (dim is not None):
+            self.observed_dist.set_dist(dim, distribution, kwds)
+        elif (kwds is None) and (dim is not None):
+            self.observed_dist.set_dist(dim, distribution)
+            
         if distribution is not None:
             if kwds is not None:
                 self.observed_dist = distributions.assign_dist(distribution, **kwds)
