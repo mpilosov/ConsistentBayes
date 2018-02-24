@@ -72,7 +72,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         P.compute_pushforward_dist() # gaussian_kde by default on the data space.
         pf_dens = P.pushforward_dist
         
-        P.set_observed_dist('chi2', {'df':num_observations}) # define your observed distribution.
+        P.set_observed_dist('chi2', {'df':num_observations}, dim=0) # define your observed distribution.
         P.set_ratio() # compute ratio (evaluate your observed and pushforward densities)
         
         

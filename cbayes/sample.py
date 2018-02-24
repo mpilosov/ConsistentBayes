@@ -137,7 +137,7 @@ class sample_set(object):
         # the following allows for manual overrides not using the parametric object.
         # e.g. kwds = {'loc': [1,2,3]}
         elif dim is None:
-            logging.warn("No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like .pdf may not work as expected.")
+            logging.warn("No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like `.pdf` may not work as expected.")
             if kwds is not None:
                 self.dist = distributions.assign_dist(distribution, **kwds)
             else: 
