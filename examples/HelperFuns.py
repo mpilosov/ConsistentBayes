@@ -25,6 +25,7 @@ def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  co
                 d = data.rvs().shape[1]
             except IndexError:
                 d = 1
+         
         data = data.rvs((N,d)) # if we get a distribution object, use it to generate samples.  
         data_subset = data 
     x_data = data_subset[:, view_dim_1]
@@ -46,8 +47,8 @@ def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  co
             la = data_subset - np.array(offset)
             U,S,V = np.linalg.svd(la)
             new_data = np.dot(V, la.transpose()).transpose() + offset
-            x_data_svd = new_data[:,0]
-            y_data_svd = new_data[:,1]
+            x_data_svd = new_data[:,view_dim_1]
+            y_data_svd = new_data[:,view_dim_2]
             
             sb.jointplot(x=x_data_svd, y=y_data_svd, kind='kde', 
                          color=rgb_color, space=space, stat_func=None)
