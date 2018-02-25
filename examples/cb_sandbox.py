@@ -31,20 +31,24 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
     if fun_choice == 0:
         def model(lam):
             return lam*np.exp(-t)
-    elif fun_choice == 1:
+    elif fun_choice == 1: # fixed frequency
         def model(lam):
-            return np.sin(lam*t)
-    elif fun_choice == 2:
+            lam_1 = 1.0
+            return np.cos(lam_1*t + np.arccos(lam) )
+    elif fun_choice == 2: # fixed initial condition
         def model(lam):
-            return lam*np.sin(t)
+            lam_2 = 1
+            return np.cos(lam*t + np.arccos(lam_2) )
     else:
         return None
         
+    
     
     # Global options - Consistent over all the trials
     plt.rcParams['figure.figsize'] = (18, 6)
     plt.close('all')
     fig, (ax1, ax2, ax3) = plt.subplots(1,3)
+    
     trial_seeds = [trial for trial in range(num_trials)] # seed each trial in the same numerical order
     entropy_list = []
     num_accept_list = []
@@ -160,9 +164,6 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
 
 
 
-
-
-
 def make_tabulated_sandbox(num_experiments=1):
     # We create many copies of the same widget objects in order to isolate our experimental areas.
     num_samples = [widgets.IntSlider(value=1500, continuous_update=False, 
@@ -176,7 +177,9 @@ def make_tabulated_sandbox(num_experiments=1):
         description='$\sigma$') for k in range(num_experiments)]
 
     lam_min, lam_max = 2.0, 7.0
-    lam_bound = [widgets.FloatRangeSlider(value=[3.0, 6.0], continuous_update=False, 
+    
+        
+    lam_bound = [widgets.FloatRangeSlider(value=[0,1], continuous_update=False, 
         orientation='horizontal', disable=False,
         min=lam_min, max = lam_max, step=0.5, 
         description='$\Lambda \in$') for k in range(num_experiments)]
@@ -219,7 +222,7 @@ def make_tabulated_sandbox(num_experiments=1):
     # IF YOU ADD MORE FUNCTIONS to cb_sandbox.py, increase max below.
     fun_choice = [widgets.IntSlider(value=0, continuous_update=False, 
         orientation='horizontal', disable=False,
-        min=0, max=1, 
+        min=0, max=2, 
         description='Fun. Choice') for k in range(num_experiments)]
     
     fixed_obs_window = [widgets.Checkbox(value=False, disable=False,
@@ -243,6 +246,22 @@ def make_tabulated_sandbox(num_experiments=1):
     
     
     ### LINK WIDGETS TOGETHER (dependent variables) ###
+    # Different ranges for different problems                        
+    def update_lam_bound(*args):
+        k = tab_nest.selected_index
+        if fun_choice[k].value == 2: # fixed frequency
+            lam_bound[k].min = 0.0
+            lam_bound[k].max = 10.0
+            lam_bound[k].value = [0, 1]
+            lam_0[k].value = 0.5
+        if fun_choice[k].value == 1: # fixed initial condition
+            lam_bound[k].min = -1.0 
+            lam_bound[k].max = 1.0
+            lam_bound[k].value = [-1, 1]
+            lam_0[k].value = 0
+            
+    [fun_choice[k].observe(update_lam_bound, 'value') for k in range(num_experiments)]
+    
     # if you change the bounds on the parameter space, update the bounds of lambda_0                          
     def update_lam_0(*args):
         k = tab_nest.selected_index
