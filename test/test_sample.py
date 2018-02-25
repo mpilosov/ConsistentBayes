@@ -79,6 +79,13 @@ class TestSampleSet:
                     kwd_dict = self.S.dist.kwds
                     deg_freedom = kwd_dict['df']                    
                     assert df == deg_freedom
+            if dist_key in ['gamma']:
+                for a in range(1):
+                    self.S.set_dist(dist_key, {'a': a})
+                    kwd_dict = self.S.dist.kwds
+                    shape = kwd_dict['a']                    
+                    assert a == shape
+                    
             if dist_key in ['beta']:
                 for (a,b) in zip(range(0,5), range(1,6)):
                     self.S.set_dist(dist_key, {'a': a, 'b':b})
@@ -96,7 +103,7 @@ class TestSampleSet:
                 self.S.set_num_samples(n)
                 self.S.set_dim(d)
                 for dist_key in D.keys():
-                    if dist_key not in ['chi2', 'beta']:
+                    if dist_key not in ['chi2', 'beta', 'gamma']:
                         self.S.set_dist(dist_key)
                         self.S.generate_samples(self.S.num_samples)
                         assert self.S.samples.shape == (n, d) # ensure the samples were generated with the correct shape
