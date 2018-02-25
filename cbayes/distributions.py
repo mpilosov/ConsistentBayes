@@ -133,6 +133,9 @@ class parametric_dist(object):
         TODO: Add this.
         """
         D = self.distributions
+        if size is None:
+            size = len(D.keys())
+            
         if type(size) is tuple:
             assert(size[1] == len(D)) # make sure the dimensions are correc
             n = size[0]

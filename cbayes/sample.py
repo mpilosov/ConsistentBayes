@@ -137,7 +137,7 @@ class sample_set(object):
         # the following allows for manual overrides not using the parametric object.
         # e.g. kwds = {'loc': [1,2,3]}
         elif dim is None:
-            logging.warn("No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like `.pdf` may not work as expected.")
+            logging.warn("INPUT: No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like `.pdf` may not work as expected.")
             if kwds is not None:
                 self.dist = distributions.assign_dist(distribution, **kwds)
             else: 
@@ -255,17 +255,27 @@ class problem_set(object):
         # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
         # TODO print warning about the aforementioned.
         # TODO check sizes, ensure dimension agreement
-        if (kwds is not None) and (dim is not None):
-            self.observed_dist.set_dist(dim, distribution, kwds)
-        elif (kwds is None) and (dim is not None):
-            self.observed_dist.set_dist(dim, distribution)
             
         if distribution is not None:
-            if kwds is not None:
-                self.observed_dist = distributions.assign_dist(distribution, **kwds)
-            else:
-                logging.warn(" No keywords given for distribution. Dimension cannot be inferred.")
-                self.observed_dist = distributions.assign_dist(distribution)
+            if (kwds is not None) and (dim is not None):
+                self.observed_dist.set_dist(dim, distribution, kwds)
+            elif (kwds is None) and (dim is not None):
+                self.observed_dist.set_dist(dim, distribution)
+
+            # Here we override the default errors printed by scipy.stats with our own.
+            elif (kwds is None) and (distributions.supported_distributions(distribution) is 'chi2' ):
+                raise(AttributeError("If you are using a chi2 distribution, please pass `df` as a key-value pair in a dictionary. Ex: {'df': 20}."))
+            elif (kwds is None) and (distributions.supported_distributions(distribution) is 'beta'):
+                raise(AttributeError("If you are using a Beta dist, please pass `a` and `b` as key-value pairs in a dictionary. Ex: {'a': 1, 'b': 1}"))
+            # the following allows for manual overrides not using the parametric object.
+            # e.g. kwds = {'loc': [1,2,3]}
+            elif dim is None:
+                logging.warn("OBS: No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like `.pdf` may not work as expected.")
+                if kwds is not None:
+                    self.observed_dist = distributions.assign_dist(distribution, **kwds)
+                else: 
+                    self.observed_dist = distributions.assign_dist(distribution)
+
         else:
             logging.warn("""No distribution specified. 
             Defaulting to normal around data_means with 0.5*data_standard_deviation""")
@@ -299,7 +309,7 @@ class problem_set(object):
         n = samples.shape[0]
         try:
             obs = self.observed_dist.pdf(samples).prod(axis=1).reshape(n)
-        except AxisError: # 1D case
+        except np.AxisError: # 1D case
             obs = self.observed_dist.pdf(samples).reshape(n)
         
         if np.allclose(samples, self.output.samples): # if you are asking for evaluation of the prior
