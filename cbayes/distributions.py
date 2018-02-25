@@ -37,7 +37,8 @@ def supported_distributions(distname=None):
         'normal': sstats.norm, 
         'uniform': sstats.uniform,
         'chi2': sstats.chi2,
-        'beta': sstats.beta
+        'beta': sstats.beta, 
+        'gamma': sstats.gamma
         }
     
     # The following overloads supported keys into our dictionary of distributions.
@@ -48,6 +49,8 @@ def supported_distributions(distname=None):
             distname = 'uniform'
         elif distname.lower() in ['chi2', 'c2', 'chisquared', 'chi_squared']:
             distname = 'chi2'
+        elif distname.lower() in ['gamma', 'g', 'gam', 'gm']:
+            distname = 'gamma'
         elif distname.lower() in ['beta', 'bt', 'b']:
             distname = 'beta'
         try:
