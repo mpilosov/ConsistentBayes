@@ -13,7 +13,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(name='cbayes',
-      version='0.3.20',
+      version='0.3.21',
       description='Consistent Bayesian Inversion',
       author='Michael Pilosov',
       author_email='mpilosov@gmail.com',
