@@ -238,13 +238,20 @@ class problem_set(object):
                     `problem_set` when instantiating the class.')
         pass
 
-    def compute_pushforward_dist(self, method=None):
+    def compute_pushforward_dist(self, method=None, kwds=None):
         r"""
         TODO: Add this.
         """
-        # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
+        if method in ['sklearn', 'sk','s']:
+            # Use sklearn's KDE module
+            if kwds is not None:
+                self.output.dist  = distributions.skde(self.output.samples, kwds)
+            else:
+                self.output.dist  = distributions.skde(self.output.samples)
+        else: # default behavior
+            # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
+            self.output.dist  = distributions.gkde(self.output.samples) # attach gaussian_kde object to this handle.
         # Evaluate this using pset.pushforward_den.pdf()
-        self.output.dist  = distributions.gkde(self.output.samples) # attach gaussian_kde object to this handle.
         self.pushforward_dist = self.output.dist
         pass
 
