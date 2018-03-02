@@ -125,17 +125,25 @@ class skde(object):
 
     """
 
-    def __init__(self, data, **kwds):
+    def __init__(self, data, mirror=False, **kwds):
+        self.mirror = mirror
         if kwds is None:
-            self.kde_object = KernelDensity(kernel='epanechnikov').fit(data)
+            if self.mirror:
+                self.kde_object = KernelDensity(kernel='gaussian').fit( np.vstack([-data, data]) )
+            else:
+                self.kde_object = KernelDensity(kernel='gaussian').fit(data)
         else:
-            self.kde_object = KernelDensity(**kwds).fit(data)
+            if self.mirror:
+                self.kde_object = KernelDensity(**kwds).fit( np.vstack([-data, data]) )
+            else:
+                self.kde_object = KernelDensity(**kwds).fit(data)
         try:
             self.d = data.shape[1]
         except IndexError:
             self.d = 1
         self.n = data.shape[0]
-
+        
+    
     def rvs(self, size=1):
         r"""
         Generates random variables from a kde object. Wrapper function for 
@@ -146,7 +154,20 @@ class skde(object):
         """
         if type(size) is tuple: 
             size=size[0]
-        return self.kde_object.sample(size)
+                        
+        if self.mirror: # have to generate twice as many samples
+            num_samps = 0
+            samps = []
+            while num_samps < size:
+                samp_proposal = self.kde_object.sample()
+                if samp_proposal > 0:
+                    samps.append(samp_proposal)
+                    num_samps += 1
+            samps = np.array(samps).reshape(size,self.d)
+        else:
+            samps = self.kde_object.sample(size)
+            
+        return samps
         #TODO write a test that makes sure this returns the correct shape
     
     def pdf(self, eval_points):
@@ -160,7 +181,13 @@ class skde(object):
         
         #: TODO write a test that makes sure this returns the correct shape
         num_samples = eval_points.shape[0]
-        p = np.exp( self.kde_object.score_samples( eval_points ) )
+        if self.mirror:
+            p = 2*np.exp( self.kde_object.score_samples( eval_points ) )
+        else:
+            try:
+                p = np.exp( self.kde_object.score_samples( eval_points ) )
+            except ValueError:
+                p = np.exp( self.kde_object.score_samples( eval_points.reshape(-1,1) ) )
         return p
     
 class parametric_dist(object): 

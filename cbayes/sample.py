@@ -238,19 +238,22 @@ class problem_set(object):
                     `problem_set` when instantiating the class.')
         pass
 
-    def compute_pushforward_dist(self, method=None, kwds=None):
+    def compute_pushforward_dist(self, method=None, mirror=False, kwds=None):
         r"""
         TODO: Add this.
         """
+        self.pf_pr_eval = None
         if method in ['sklearn', 'sk', 's', 'skl', 'scikit', 'sckitlearn']:
             # Use sklearn's KDE module
             if kwds is not None:
-                self.output.dist  = distributions.skde(self.output.samples, **kwds)
+                self.output.dist  = distributions.skde(self.output.samples, mirror, **kwds)
             else:
-                self.output.dist  = distributions.skde(self.output.samples)
+                self.output.dist  = distributions.skde(self.output.samples, mirror)
         else: # default behavior
             # Use Gaussian Kernel Density Estimation to estimate the density of the pushforward of the posterior
             self.output.dist  = distributions.gkde(self.output.samples) # attach gaussian_kde object to this handle.
+            if mirror is True:
+                print("Warning: You specified mirroring with the scipy gaussian kde. This is currently unsupported. Ignoring.")
         # Evaluate this using pset.pushforward_den.pdf()
         self.pushforward_dist = self.output.dist
         pass
