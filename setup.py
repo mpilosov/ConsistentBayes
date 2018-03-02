@@ -13,7 +13,7 @@ except ImportError:
     from distutils.core import setup
 
 setup(name='cbayes',
-      version='0.3.16',
+      version='0.3.17',
       description='Consistent Bayesian Inversion',
       author='Michael Pilosov',
       author_email='mpilosov@gmail.com',
@@ -21,4 +21,4 @@ setup(name='cbayes',
       url='https://github.com/mpilosov/ConsistentBayes/',
       packages=['cbayes'],
       install_requires=['matplotlib', 'scipy', 'numpy', 'nose', 'seaborn',
-           'ipykernel', 'ipywidgets'])
+           'ipykernel', 'ipywidgets', 'sklearn'])
