@@ -245,7 +245,7 @@ class problem_set(object):
         if method in ['sklearn', 'sk','s']:
             # Use sklearn's KDE module
             if kwds is not None:
-                self.output.dist  = distributions.skde(self.output.samples, kwds)
+                self.output.dist  = distributions.skde(self.output.samples, **kwds)
             else:
                 self.output.dist  = distributions.skde(self.output.samples)
         else: # default behavior
