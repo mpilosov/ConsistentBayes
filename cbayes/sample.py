@@ -327,9 +327,9 @@ class problem_set(object):
             if np.allclose(samples, self.output.samples): # if you are asking for evaluation of the prior
                 if self.pf_pr_eval is not None:
                     pf = self.pf_pr_eval
-            else: # if it hasn't been previously computed before, store it.
-                pf = self.eval_pf_prior()
-        else: # if sizes dont match, we know it is a new set.
+                else: # if it hasn't been previously computed before, store it.
+                    pf = self.eval_pf_prior()
+            else: # if sizes dont match, we know it is a new set.
                 pf = self.eval_pf_prior()
         else: # if you are asking for a different set of output samples to be evaluated,
             pf = self.pushforward_dist.pdf(samples).reshape(n)
