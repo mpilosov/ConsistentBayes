@@ -127,11 +127,14 @@ class skde(object):
 
     def __init__(self, data, **kwds):
         if kwds is None:
-            self.kde_object = Kernel_Density(kernel='epanechnikov').fit(data)
+            self.kde_object = KernelDensity(kernel='epanechnikov').fit(data)
         else:
-            self.kde_object = Kernel_Density(**kwds).fit(data)
-        self.d = self.kde_object.d
-        self.n = self.kde_object.n
+            self.kde_object = KernelDensity(**kwds).fit(data)
+        try:
+            self.d = data.shape[1]
+        except IndexError:
+            self.d = 1
+        self.n = data.shape[0]
 
     def rvs(self, size=1):
         r"""
@@ -157,7 +160,7 @@ class skde(object):
         
         #: TODO write a test that makes sure this returns the correct shape
         num_samples = eval_points.shape[0]
-        p = self.kde_object.score_samples( eval_points ) 
+        p = 10**self.kde_object.score_samples( eval_points ) 
         return p
     
 class parametric_dist(object): 
@@ -223,6 +226,39 @@ class parametric_dist(object):
         return self.pdf(eval_points)
 
     def fit(self, dim):
+        pass
+    
+    def mean(self):
+        D = self.distributions
+        
+        for dist in D.keys():
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+                      
+        return [ D[dist].mean() for dist in D.keys() ]
+    
+    def std(self):
+        D = self.distributions
+        
+        for dist in D.keys():
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+                      
+        return [ D[dist].std() for dist in D.keys() ]
+        
+        
+    def assign_dist(self, dim, dist='normal', kwds=None):
+        D = self.distributions
+        if kwds is not None:
+            D[str(dim)] = assign_dist(dist, **kwds)
+        else:
+            D[str(dim)] = assign_dist(dist)
         pass
     
     def set_dist(self, dim, dist='normal', kwds=None):

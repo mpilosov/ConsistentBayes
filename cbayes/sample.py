@@ -242,7 +242,7 @@ class problem_set(object):
         r"""
         TODO: Add this.
         """
-        if method in ['sklearn', 'sk','s']:
+        if method in ['sklearn', 'sk', 's', 'skl', 'scikit', 'sckitlearn']:
             # Use sklearn's KDE module
             if kwds is not None:
                 self.output.dist  = distributions.skde(self.output.samples, **kwds)
