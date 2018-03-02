@@ -160,7 +160,7 @@ class skde(object):
         
         #: TODO write a test that makes sure this returns the correct shape
         num_samples = eval_points.shape[0]
-        p = 10**self.kde_object.score_samples( eval_points ) 
+        p = np.exp( self.kde_object.score_samples( eval_points ) )
         return p
     
 class parametric_dist(object): 
