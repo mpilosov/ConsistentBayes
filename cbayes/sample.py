@@ -41,6 +41,7 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
     output_sample_set = sample_set(size=output_samples.shape)
     output_sample_set.samples = output_samples
     pset = problem_set(input_sample_set, output_sample_set)
+    pset.model = QoI_fun
     return pset
 
 class sample_set(object):
@@ -188,6 +189,7 @@ class problem_set(object):
     def __init__(self, input_set=None, output_set=None, seed=None):
         self.input = input_set
         self.output = output_set
+        self.model = None
         self.prior_dist = self.input.dist
         self.pushforward_dist = self.output.dist # kde object. should have rvs functionality. TODO: double check sizing with test.
         self.posterior_dist = None # this will be the dictionary object which we can use with .rvs(num_samples)
@@ -321,11 +323,13 @@ class problem_set(object):
             obs = self.observed_dist.pdf(samples).prod(axis=1).reshape(n)
         except np.AxisError: # 1D case
             obs = self.observed_dist.pdf(samples).reshape(n)
-        
-        if np.allclose(samples, self.output.samples): # if you are asking for evaluation of the prior
-            if self.pf_pr_eval is not None:
-                pf = self.pf_pr_eval
+        if len(samples) == len(self.output.samples):
+            if np.allclose(samples, self.output.samples): # if you are asking for evaluation of the prior
+                if self.pf_pr_eval is not None:
+                    pf = self.pf_pr_eval
             else: # if it hasn't been previously computed before, store it.
+                pf = self.eval_pf_prior()
+        else: # if sizes dont match, we know it is a new set.
                 pf = self.eval_pf_prior()
         else: # if you are asking for a different set of output samples to be evaluated,
             pf = self.pushforward_dist.pdf(samples).reshape(n)
@@ -343,7 +347,15 @@ class problem_set(object):
         ratio = self.compute_ratio(data)
         self.ratio = ratio
         pass
-        
+    
+    def evaluate_posterior(self, samples):
+        r"""
+        TODO: rewrite description
+        Evaluates but does not store an evaluation of the posterior.
+        """
+        return self.input.dist.pdf(samples)*self.compute_ratio(self.model(samples))
+    
+    
 def save_sample_set():
     r"""
     TODO: Add this.
