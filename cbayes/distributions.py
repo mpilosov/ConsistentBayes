@@ -116,6 +116,49 @@ class gkde(object):
         num_samples = eval_points.shape[0]
         p = self.kde_object.pdf( eval_points.transpose() ) 
         return p
+
+class skde(object):
+    r"""
+    
+    Custom wrapper around `sklearn.neighbors.kde.KernelDensity` to conform
+    to our prefered syntax calling (following scipy conventions)
+
+    """
+
+    def __init__(self, data, **kwds):
+        if kwds is None:
+            self.kde_object = Kernel_Density(kernel='epanechnikov').fit(data)
+        else:
+            self.kde_object = Kernel_Density(**kwds).fit(data)
+        self.d = self.kde_object.d
+        self.n = self.kde_object.n
+
+    def rvs(self, size=1):
+        r"""
+        Generates random variables from a kde object. Wrapper function for 
+        `sklearn.neighbors.kde.KernelDensity.sample`.
+        
+        :param int size: number of random samples to generate
+        :param tuple size: number of samples is taken to be the first argument
+        """
+        if type(size) is tuple: 
+            size=size[0]
+        return self.kde_object.sample(size)
+        #TODO write a test that makes sure this returns the correct shape
+    
+    def pdf(self, eval_points):
+        r"""
+        Generates random variables from a kde object. Wrapper function for 
+        `sklearn.neighbors.kde.KernelDensity.score_samples`.
+        
+        :param eval_points: points on which to evaluate the density.
+        :type eval_points: :class:`numpy.ndarray` of shape (num, dim)
+        """
+        
+        #: TODO write a test that makes sure this returns the correct shape
+        num_samples = eval_points.shape[0]
+        p = self.kde_object.score_samples( eval_points ) 
+        return p
     
 class parametric_dist(object): 
     r"""
