@@ -324,7 +324,7 @@ class problem_set(object):
         except np.AxisError: # 1D case
             obs = self.observed_dist.pdf(samples).reshape(n)
         if len(samples) == len(self.output.samples):
-            if np.allclose(samples, self.output.samples): # if you are asking for evaluation of the prior
+            if np.allclose(samples.ravel(), self.output.samples.ravel()): # if you are asking for evaluation of the prior
                 if self.pf_pr_eval is not None:
                     pf = self.pf_pr_eval
                 else: # if it hasn't been previously computed before, store it.
