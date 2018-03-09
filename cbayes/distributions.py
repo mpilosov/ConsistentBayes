@@ -182,7 +182,7 @@ class skde(object):
         #: TODO write a test that makes sure this returns the correct shape
         num_samples = eval_points.shape[0]
         if self.mirror:
-            p = 2*np.exp( self.kde_object.score_samples( eval_points ) )
+            p = 2*np.exp( self.kde_object.score_samples( eval_points ) ).reshape(num_samples)
         else:
             try:
                 p = np.exp( self.kde_object.score_samples( eval_points ) )
