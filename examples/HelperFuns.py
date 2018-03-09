@@ -13,6 +13,11 @@ def grid(nbins=5, mins=np.zeros(1), maxs=np.ones(1) ):
     SS = S.ravel().reshape(dim,nbins**dim).T
     return SS
 
+def ngrid(nbins=5, mins=np.zeros(1), maxs=np.ones(1) ):
+    dim = len(mins)
+    S = np.array( np.meshgrid(*[np.linspace(i,j,nbins) for i,j in zip(mins, maxs)]) )
+    SS = S.ravel().reshape(dim,nbins**dim).T
+    return SS
 
 def pltdata(data, view_dim_1=0, view_dim_2=1, eta_r=None, inds=None, N=None,  color="eggplant", space=0.05, svd=False): # plots first N of accepted, any 2D marginals specified
     if type(data) is np.ndarray:
