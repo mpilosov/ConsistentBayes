@@ -267,7 +267,8 @@ class problem_set(object):
         # If `distribution = None`, we query the pushforward density for the top 5% to get a MAP estimate
         # TODO print warning about the aforementioned.
         # TODO check sizes, ensure dimension agreement
-            
+        self.observed_dist = None # clear out. 
+        
         if distribution is not None:
             if (kwds is not None) and (dim is not None):
                 self.observed_dist.set_dist(dim, distribution, kwds)
