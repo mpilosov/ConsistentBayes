@@ -43,11 +43,16 @@ def perform_accept_reject(samples, ratios, seed=21):
     nr = np.random.rand(num_samples)
     accept_inds = [i for i in range(num_samples) 
                 if eta_r[i] > nr[i] ] 
+#    accept_inds = []
+#    for i in range(num_samples):
+#        if eta_r[i] > nr[i]:
+#            accept_inds.append(i)
+#    accept_inds = np.array(accept_inds)
     return accept_inds
 
 #: TODO ADD A LOT MORE METHODS. Weighted KDE, surrogate post, MCMC, etc.
 
-def problem(problem_set, method='AR', seed=21):
+def problem(problem_set, method='AR', seed=25):
     r"""
     This solves the inverse problem. It's a wrapper for other functions.
     
