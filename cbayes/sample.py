@@ -245,7 +245,7 @@ class problem_set(object):
         TODO: Add this.
         """
         self.pf_pr_eval = None
-        if method in ['sklearn', 'sk', 's', 'skl', 'scikit', 'sckitlearn']:
+        if method in ['sklearn', 'sk', 'k', 'skl', 'scikit', 'sckitlearn']:
             # Use sklearn's KDE module
             if kwds is not None:
                 self.output.dist  = distributions.skde(self.output.samples, mirror, **kwds)
