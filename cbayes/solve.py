@@ -40,8 +40,9 @@ def perform_accept_reject(samples, ratios, seed=0):
     eta_r = ratios/M
     
     np.random.seed(seed)
+    nr = np.random.rand(num_samples)
     accept_inds = [i for i in range(num_samples) 
-                if eta_r[i] > np.random.rand() ] 
+                if eta_r[i] > nr[i] ] 
     return accept_inds
 
 #: TODO ADD A LOT MORE METHODS. Weighted KDE, surrogate post, MCMC, etc.
