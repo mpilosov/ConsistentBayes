@@ -32,19 +32,20 @@ class TestSolve(object):
             return 2*params
             
         
-        num_samples = 1000
+        num_samples = 2000
         num_tests = 50
         
         for dim in range(1,6):
             err = []
-            ones = np.ones(dim)
             S = sample.sample_set()  # instantiate the class
             S.set_dim(dim) # just get the default setup options (x ~ U[0,1])
-            S.set_dist('uniform', {'loc': 0*ones, 'scale': 1*ones }) 
+            for j in range(dim):
+                S.set_dist('uniform', {'loc': 0, 'scale': 1}, j)
             S.generate_samples(num_samples)
             P = sample.map_samples_and_create_problem(S, model)
             P.compute_pushforward_dist()
-            P.set_observed_dist('uniform', {'loc': 0.5*ones, 'scale': 1*ones })
+            for j in range(dim):
+                P.set_observed_dist('uniform', {'loc': 0.5, 'scale': 1}, j)
             P.set_ratio()
             
             for seed in range(num_tests):
@@ -53,4 +54,4 @@ class TestSolve(object):
                                 (0.5**P.input.dim)*P.input.num_samples))
             avg_missed = np.mean(err)
             print('dim %d: num of accepted inds out of %d trials in: %d'%(dim, num_tests, avg_missed))
-            assert avg_missed < (0.05)*P.input.num_samples # want within 1% of num_samples
+            assert avg_missed < (0.05)*P.input.num_samples # want within 5% of num_samples

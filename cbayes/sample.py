@@ -45,7 +45,7 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
     return pset
 
 class sample_set(object):
-    def __init__(self, size=(None, None), seed=0):
+    def __init__(self, size=(None, None), seed=121):
         r"""
 
         Initialization
@@ -203,7 +203,7 @@ class problem_set(object):
         self.ratio = None # the ratio is the posterior density evaluated on the `input_set.samples`
         self.pf_pr_eval = None
         if seed is None:
-            self.seed = 0
+            self.seed = 12112
         else:
             self.seed = seed
 
@@ -245,7 +245,7 @@ class problem_set(object):
         TODO: Add this.
         """
         self.pf_pr_eval = None
-        if method in ['sklearn', 'sk', 's', 'skl', 'scikit', 'sckitlearn']:
+        if method in ['sklearn', 'sk', 'k', 'skl', 'scikit', 'sckitlearn']:
             # Use sklearn's KDE module
             if kwds is not None:
                 self.output.dist  = distributions.skde(self.output.samples, mirror, **kwds)
