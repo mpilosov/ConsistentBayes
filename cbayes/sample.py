@@ -45,7 +45,7 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
     return pset
 
 class sample_set(object):
-    def __init__(self, size=(None, None), seed=0):
+    def __init__(self, size=(None, None), seed=21):
         r"""
 
         Initialization

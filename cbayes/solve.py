@@ -16,7 +16,7 @@ from nose import with_setup # optional
 #: TODO add logging/warnings, save options, load options.
 # import os, logging 
 
-def perform_accept_reject(samples, ratios, seed=0):
+def perform_accept_reject(samples, ratios, seed=21):
     r"""
     TODO: CHECK SIZES!!! samples and ratios should match up.
     Perform a standard accept/reject procedure by comparing 
@@ -47,7 +47,7 @@ def perform_accept_reject(samples, ratios, seed=0):
 
 #: TODO ADD A LOT MORE METHODS. Weighted KDE, surrogate post, MCMC, etc.
 
-def problem(problem_set, method='AR', seed=0):
+def problem(problem_set, method='AR', seed=21):
     r"""
     This solves the inverse problem. It's a wrapper for other functions.
     
