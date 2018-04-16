@@ -240,7 +240,7 @@ class problem_set(object):
                     `problem_set` when instantiating the class.')
         pass
 
-    def compute_pushforward_dist(self, method='sk', mirror=False, kwds=None):
+    def compute_pushforward_dist(self, method='sc', mirror=False, kwds=None):
         r"""
         TODO: Add this.
         """
