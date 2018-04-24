@@ -113,7 +113,10 @@ class gkde(object):
         """
         
         #: TODO write a test that makes sure this returns the correct shape
-        num_samples = eval_points.shape[0]
+        try:
+            num_samples = eval_points.shape[0]
+        except AttributeError:
+            num_samples = 1
         p = self.kde_object.pdf( eval_points.transpose() ) 
         return p
 
@@ -229,7 +232,10 @@ class parametric_dist(object):
         return output
     
     def pdf(self, eval_points):
-        size = eval_points.shape
+        try:
+            size = eval_points.shape
+        except AttributeError:
+            size = np.array([1,1])
         D = self.distributions
         try:
             dim = size[1]
@@ -238,7 +244,10 @@ class parametric_dist(object):
             if len(D) != dim:
                 raise(IndexError("Could not infer dimensions. `eval_points` has the wrong shape."))
         n = size[0]
-        eval_points = eval_points.reshape(n, dim)
+        try:
+            eval_points = eval_points.reshape(n, dim)
+        except AttributeError:
+            pass
         output = np.ones(n)
         for ind, dist in enumerate(D.keys()):
             try:

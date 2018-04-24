@@ -260,7 +260,7 @@ class problem_set(object):
         self.pushforward_dist = self.output.dist
         pass
 
-    def set_observed_dist(self, distribution=None, kwds=None, dim=None):
+    def set_observed_dist(self, dist=None, kwds=None, dim=None):
         r"""
         TODO: Add this.
         """
@@ -269,25 +269,25 @@ class problem_set(object):
         # TODO check sizes, ensure dimension agreement
          
         
-        if distribution is not None:
+        if dist is not None:
             if (kwds is not None) and (dim is not None):
-                self.observed_dist.set_dist(dim, distribution, kwds)
+                self.observed_dist.set_dist(dim, dist, kwds)
             elif (kwds is None) and (dim is not None):
-                self.observed_dist.set_dist(dim, distribution)
+                self.observed_dist.set_dist(dim, dist)
 
             # Here we override the default errors printed by scipy.stats with our own.
-            elif (kwds is None) and (distributions.supported_distributions(distribution) is 'chi2' ):
+            elif (kwds is None) and (distributions.supported_distributions(dist) is 'chi2' ):
                 raise(AttributeError("If you are using a chi2 distribution, please pass `df` as a key-value pair in a dictionary. Ex: {'df': 20}."))
-            elif (kwds is None) and (distributions.supported_distributions(distribution) is 'beta'):
+            elif (kwds is None) and (distributions.supported_distributions(dist) is 'beta'):
                 raise(AttributeError("If you are using a Beta dist, please pass `a` and `b` as key-value pairs in a dictionary. Ex: {'a': 1, 'b': 1}"))
             # the following allows for manual overrides not using the parametric object.
             # e.g. kwds = {'loc': [1,2,3]}
             elif dim is None:
                 logging.warn("OBS: No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like `.pdf` may not work as expected.")
                 if kwds is not None:
-                    self.observed_dist = distributions.assign_dist(distribution, **kwds)
+                    self.observed_dist = distributions.assign_dist(dist, **kwds)
                 else: 
-                    self.observed_dist = distributions.assign_dist(distribution)
+                    self.observed_dist = distributions.assign_dist(dist)
 
         else:
             logging.warn("""No distribution specified. 
