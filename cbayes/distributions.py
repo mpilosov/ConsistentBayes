@@ -255,7 +255,10 @@ class parametric_dist(object):
             except AssertionError:
                 raise(ValueError("""
                 You are missing a distributionin key:%s, please use `self.setdist`"""%dist))    
-            output *= D[dist].pdf( eval_points[:,ind] )
+            try:
+                output *= D[dist].pdf( eval_points[:,ind] )
+            except TypeError:
+                output *= D[dist].pdf(eval_points)
         return output
 
     def evaluate(self, eval_points):
