@@ -117,6 +117,8 @@ class gkde(object):
             num_samples = eval_points.shape[0]
         except AttributeError:
             num_samples = 1
+        except IndexError:
+            num_samples = 1
         p = self.kde_object.pdf( eval_points.transpose() ) 
         return p
 
@@ -246,7 +248,9 @@ class parametric_dist(object):
         n = size[0]
         try:
             eval_points = eval_points.reshape(n, dim)
-        except AttributeError:
+        except AttributeError: # trying to catch singletons without an error.
+            pass
+        except IndexError:
             pass
         output = np.ones(n)
         for ind, dist in enumerate(D.keys()):
