@@ -19,6 +19,41 @@ import cbayes.distributions as distributions
 #: import glob 
 # import warnings (# what does warnings do that logging cannot?)
 
+def generate_input_set_from_dict(U, num_samples = 1):
+    unit_names = list(U.keys())
+    try:
+        assert(len(np.unique([len(U[n].keys()) for n in unit_names])) == 1)
+    except AssertionError:
+        print('Something is amiss in your dictionary. Perhaps extra or missing variables.')
+    unit_variables = list(U[unit_names[0]].keys())
+#     print(unit_variables) # the order appears to be preserved.
+    dim = len(unit_variables)*len(unit_names)
+    P = cbayes.distributions.parametric_dist(dim)
+    param_names = [] # both of these attributes will now belong to the sample set.
+    di = 0
+    for n in unit_names:
+        for v in unit_variables:
+            P.set_dist(**U[n][v], dim=di)
+            param_names.append(v+'-'+n) # FORMATTING FOR NAMES
+            di+=1
+    
+    P.names = unit_names
+    P.vars = unit_variables
+    P.params = param_names
+    S = cbayes.sample.sample_set((num_samples,dim))
+    S.dist = P
+    S.generate_samples()
+    return S
+
+def generate_sample_dict(S):
+    P = S.dist # take a sample set that has input samples already generated.
+    lam = S.samples
+    V = {n:{v: None for v in P.vars} for n in P.names}
+    for d in range(S.dim):
+        p_info = P.params[d].rsplit('-')
+        V[p_info[1]][p_info[0]] = lam[:,d]
+    return V
+
 def map_samples_and_create_problem(input_sample_set, QoI_fun):
     r"""
     TODO: full description, check type conformity
