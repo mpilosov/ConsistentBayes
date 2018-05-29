@@ -28,7 +28,7 @@ def generate_input_set_from_dict(U, num_samples = 1):
     unit_variables = list(U[unit_names[0]].keys())
 #     print(unit_variables) # the order appears to be preserved.
     dim = len(unit_variables)*len(unit_names)
-    P = cbayes.distributions.parametric_dist(dim)
+    P = distributions.parametric_dist(dim)
     param_names = [] # both of these attributes will now belong to the sample set.
     di = 0
     for n in unit_names:
@@ -40,7 +40,7 @@ def generate_input_set_from_dict(U, num_samples = 1):
     P.names = unit_names
     P.vars = unit_variables
     P.params = param_names
-    S = cbayes.sample.sample_set((num_samples,dim))
+    S = sample_set((num_samples,dim))
     S.dist = P
     S.generate_samples()
     return S
