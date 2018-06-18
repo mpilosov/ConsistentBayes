@@ -19,7 +19,7 @@ import cbayes.distributions as distributions
 #: import glob 
 # import warnings (# what does warnings do that logging cannot?)
 
-def generate_input_set_from_dict(U, num_samples = 1):
+def generate_sample_set_from_dict(U, num_samples = 1):
     unit_names = list(U.keys())
     try:
         assert(len(np.unique([len(U[n].keys()) for n in unit_names])) == 1)
@@ -161,9 +161,9 @@ class sample_set(object):
         TODO: Add this.
         """
         if (kwds is not None) and (dim is not None):
-            self.dist.set_dist(dim, distribution, kwds)
+            self.dist.set_dist(distribution, kwds, dim)
         elif (kwds is None) and (dim is not None):
-            self.dist.set_dist(dim, distribution)
+            self.dist.set_dist(distribution, dim)
 
         # Here we override the default errors printed by scipy.stats with our own.
         elif (kwds is None) and (distributions.supported_distributions(distribution) is 'chi2' ):
@@ -306,9 +306,9 @@ class problem_set(object):
         
         if dist is not None:
             if (kwds is not None) and (dim is not None):
-                self.observed_dist.set_dist(dim, dist, kwds)
+                self.observed_dist.set_dist(dist, kwds, dim)
             elif (kwds is None) and (dim is not None):
-                self.observed_dist.set_dist(dim, dist)
+                self.observed_dist.set_dist(dist, dim)
 
             # Here we override the default errors printed by scipy.stats with our own.
             elif (kwds is None) and (distributions.supported_distributions(dist) is 'chi2' ):

@@ -204,10 +204,9 @@ class parametric_dist(object):
         that hides the complexity.
         
     """
-    def __init__(self, dim):
+    def __init__(self, dim=1):
         self.dim = dim # this mimicks the scipy.stats.multivariate attribute
         self.distributions = {str(d): None for d in range(dim)}
-        
         
     def rvs(self, size=None):
         r"""
@@ -245,7 +244,10 @@ class parametric_dist(object):
             dim = 1 
             if len(D) != dim:
                 raise(IndexError("Could not infer dimensions. `eval_points` has the wrong shape."))
-        n = size[0]
+        try:
+            n = size[0]
+        except IndexError:
+            n = 1
         try:
             eval_points = eval_points.reshape(n, dim)
         except AttributeError: # trying to catch singletons without an error.
@@ -258,11 +260,81 @@ class parametric_dist(object):
                 assert(D[dist] is not None)
             except AssertionError:
                 raise(ValueError("""
-                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))    
+                You are missing a distribution in key:%s, please use `self.set_dist`"""%dist))    
             try:
                 output *= D[dist].pdf( eval_points[:,ind] )
             except TypeError:
                 output *= D[dist].pdf(eval_points)
+        return output
+
+    def ppf(self, eval_points):
+        try:
+            size = eval_points.shape
+        except AttributeError:
+            size = np.array([1,1])
+        D = self.distributions
+        try:
+            dim = size[1]
+        except IndexError:
+            dim = 1 
+            if len(D) != dim:
+                raise(IndexError("Could not infer dimensions. `eval_points` has the wrong shape."))
+        try:
+            n = size[0]
+        except IndexError:
+            n = 1
+        try:
+            eval_points = eval_points.reshape(n, dim)
+        except AttributeError: # trying to catch singletons without an error.
+            pass
+        except IndexError:
+            pass
+        output = np.ones(n)
+        for ind, dist in enumerate(D.keys()):
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distribution in key:%s, please use `self.set_dist`"""%dist))    
+            try:
+                output *= D[dist].ppf( eval_points[:,ind] )
+            except TypeError:
+                output *= D[dist].ppf(eval_points)
+        return output
+
+    def cdf(self, eval_points):
+        try:
+            size = eval_points.shape
+        except AttributeError:
+            size = np.array([1,1])
+        D = self.distributions
+        try:
+            dim = size[1]
+        except IndexError:
+            dim = 1 
+            if len(D) != dim:
+                raise(IndexError("Could not infer dimensions. `eval_points` has the wrong shape."))
+        try:
+            n = size[0]
+        except IndexError:
+            n = 1
+        try:
+            eval_points = eval_points.reshape(n, dim)
+        except AttributeError: # trying to catch singletons without an error.
+            pass
+        except IndexError:
+            pass
+        output = np.ones(n)
+        for ind, dist in enumerate(D.keys()):
+            try:
+                assert(D[dist] is not None)
+            except AssertionError:
+                raise(ValueError("""
+                You are missing a distribution in key:%s, please use `self.set_dist`"""%dist))    
+            try:
+                output *= D[dist].cdf( eval_points[:,ind] )
+            except TypeError:
+                output *= D[dist].cdf(eval_points)
         return output
 
     def evaluate(self, eval_points):
@@ -279,7 +351,7 @@ class parametric_dist(object):
                 assert(D[dist] is not None)
             except AssertionError:
                 raise(ValueError("""
-                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+                You are missing a distribution in key:%s, please use `self.set_dist`"""%dist))    
                       
         return [ D[dist].mean() for dist in D.keys() ]
     
@@ -291,12 +363,12 @@ class parametric_dist(object):
                 assert(D[dist] is not None)
             except AssertionError:
                 raise(ValueError("""
-                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+                You are missing a distribution in key:%s, please use `self.set_dist`"""%dist))    
                       
         return [ D[dist].std() for dist in D.keys() ]
         
         
-    def assign_dist(self, dim, dist='normal', kwds=None):
+    def assign_dist(self, dist='beta', kwds=None, dim=0):
         D = self.distributions
         if kwds is not None:
             D[str(dim)] = assign_dist(dist, **kwds)
@@ -304,10 +376,12 @@ class parametric_dist(object):
             D[str(dim)] = assign_dist(dist)
         pass
     
-    def set_dist(self, dim, dist='normal', kwds=None):
+    def set_dist(self, dist='beta', kwds=None, dim=0):
         D = self.distributions
         if kwds is not None:
             D[str(dim)] = assign_dist(dist, **kwds)
+        elif dist=='beta' and kwds is None:
+            D[str(dim)] = assign_dist(dist, a=1, b=1)
         else:
             D[str(dim)] = assign_dist(dist)
         pass
