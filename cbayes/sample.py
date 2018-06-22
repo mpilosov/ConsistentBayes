@@ -357,7 +357,7 @@ class problem_set(object):
         n = samples.shape[0]
         try:
             obs = self.observed_dist.pdf(samples).prod(axis=1).reshape(n)
-        except np.AxisError: # 1D case
+        except ValueError: # 1D case
             obs = self.observed_dist.pdf(samples).reshape(n)
         if len(samples) == len(self.output.samples):
             if np.allclose(samples.ravel(), self.output.samples.ravel()): # if you are asking for evaluation of the prior
