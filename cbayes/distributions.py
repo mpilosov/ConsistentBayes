@@ -227,7 +227,7 @@ class parametric_dist(object):
                 assert(D[dist] is not None)
             except AssertionError:
                 raise(ValueError("""
-                You are missing a distributionin key:%s, please use `self.setdist`"""%dist))
+                You are missing a distributionin key:%s, please use `self.set_dist`"""%dist))
                       
         output = np.concatenate( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
         return output
