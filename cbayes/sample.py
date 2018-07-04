@@ -19,7 +19,17 @@ import cbayes.distributions as distributions
 #: import glob 
 # import warnings (# what does warnings do that logging cannot?)
 
-def generate_sample_set_from_dict(U, num_samples = 1):
+def generate_sample_set_from_dict(U, num_samples = 1, seed=None):
+    r"""
+     This module takes a nested dictionary (one inside another) 
+     which contains the description of the distribution in that parameter
+     and generates the samples described therein and generates a sample set.
+     Descriptions of each parameter name are in `sample_set.dist.names`, which
+     describes the keys in the outer dictionary, and `sample_set.dist.vars`, 
+     which descirbes the inner layers (assumed to match). 
+     :returns: samples ordered by columns, `sample_set.dist.params` contains the ordering as strings
+     :returns: :class:`~np.array` 
+    """
     unit_names = list(U.keys())
     try:
         assert(len(np.unique([len(U[n].keys()) for n in unit_names])) == 1)
@@ -42,7 +52,7 @@ def generate_sample_set_from_dict(U, num_samples = 1):
     P.params = param_names
     S = sample_set((num_samples,dim))
     S.dist = P
-    S.generate_samples()
+    S.generate_samples(seed=seed)
     return S
 
 def generate_sample_dict(S):
@@ -53,6 +63,31 @@ def generate_sample_dict(S):
         p_info = P.params[d].rsplit('-')
         V[p_info[1]][p_info[0]] = lam[:,d]
     return V
+
+def MSE_generator(model, observed_data, sigma=None):   # this generates a sum of squared residuals.
+    r"""
+     Defines Mean Squared Error as quantity of interest. 
+     uses `observed_data` with assumed N(0, sigma) noise model. 
+    
+    :param model: function to which input samples will be passed
+    :type input_sample_set: :class:`~cbayes.sample_set` input samples
+    :observed_data: data or observations you are trying to match
+    :type observed_data: :ckass:`~np.array` with same shape as the output of `model`
+    :param sigma: vector or constant assumed std. dev of `observed_data`
+    :type sigma: :class:`~np.array` or :class:`float`
+    """
+
+    def QoI_fun(inputs): # that conforms to our desired model input
+        M = len(observed_data)
+        predictions = model(inputs)
+        assert predictions.shape[1] == M
+        residuals = predictions - observed_data
+        if sigma is not None:
+            QoI = (1./M)*np.sum( (residuals/sigma)**2, axis=1 )   # MSE
+        else:
+            QoI = (1./M)*np.sum( (residuals/observed_data)**2, axis=1 )  # MRSE
+        return QoI
+    return QoI_fun
 
 def map_samples_and_create_problem(input_sample_set, QoI_fun):
     r"""
