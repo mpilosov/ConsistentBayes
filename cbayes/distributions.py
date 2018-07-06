@@ -60,7 +60,7 @@ def supported_distributions(distname=None):
     else: # if d is unspecified, simply return the dictionary.
         return D
 
-def assign_dist(distribution, **kwds):
+def assign_dist(dist, **kwds):
     r"""
     TODO clean up description of how this is overloaded.
     If a string is passed, it will be matched against the options for `supported_distributions`
@@ -69,8 +69,8 @@ def assign_dist(distribution, **kwds):
     rtype: :class:`scipy.stats._distn_infrastructure`
     :returns: scipy distribution object 
     """
-    if type(distribution) is str:
-        distribution = supported_distributions(distribution)
+    if type(dist) is str:
+        distribution = supported_distributions(dist)
     if kwds is not None:
         return distribution(**kwds)
     else:
