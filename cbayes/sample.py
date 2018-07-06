@@ -374,7 +374,7 @@ class problem_set(object):
         if self.pushforward_dist is None:
             raise(AttributeError("You are missing a defined pushforward distribution"))
         else:
-            pf = self.pushforward_dist.pdf(self.output.samples).reshape(self.output.num_samples)
+            pf = self.pushforward_dist.pdf(self.output.samples)
             self.pf_pr_eval = pf
         return pf
         

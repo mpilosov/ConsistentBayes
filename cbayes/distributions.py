@@ -134,14 +134,14 @@ class skde(object):
         self.mirror = mirror
         if kwds is None:
             if self.mirror:
-                self.kde_object = KernelDensity(kernel='gaussian').fit( np.vstack([-data, data]) )
+                self.kde_object = KernelDensity(kernel='gaussian').fit( np.vstack([-data, data]).reshape(-1,1) )
             else:
                 self.kde_object = KernelDensity(kernel='gaussian').fit(data)
         else:
             if self.mirror:
-                self.kde_object = KernelDensity(**kwds).fit( np.vstack([-data, data]) )
+                self.kde_object = KernelDensity(**kwds).fit( np.vstack([-data.reshape(-1,1), data.reshape(-1,1)]) )
             else:
-                self.kde_object = KernelDensity(**kwds).fit(data)
+                self.kde_object = KernelDensity(**kwds).fit(data.reshape(-1,1))
         try:
             self.d = data.shape[1]
         except IndexError:
