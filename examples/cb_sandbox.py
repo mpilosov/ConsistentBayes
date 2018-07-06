@@ -57,7 +57,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
     # Instantiate the sample set object.
     S = samp.sample_set(size=(num_samples,1))
     a, b = lam_bound
-    S.set_dist('uniform',{'loc':a, 'scale':b-a}) # same distribution object for all
+    S.set_dist(dim=0, dist='uniform',kwds={'loc':a, 'scale':b-a}) # same distribution object for all
     
     for seed in trial_seeds:
         if not fixed_noise: # if we change the noise model from run-to-run, recompute observed_data
@@ -68,7 +68,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         # Sample the Parameter Space
         S.generate_samples(seed=seed)
         lam = S.samples
-        QoI_fun = SSE_generator(model, observed_data, sigma) # generates a function that just takes `lam` as input
+        QoI_fun = samp.MSE_generator(model, observed_data, sigma) # generates a function that just takes `lam` as input
         P = samp.map_samples_and_create_problem(S, QoI_fun)
         # Map to Data Space
         D = P.output.samples.transpose()
@@ -76,7 +76,8 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         P.compute_pushforward_dist() # gaussian_kde by default on the data space.
         pf_dens = P.pushforward_dist
         
-        P.set_observed_dist('chi2', {'df':num_observations}, dim=0) # define your observed distribution.
+        #P.set_observed_dist(dim=0, dist='chi2', kwds={'df':num_observations}) # define your observed distribution.
+        P.set_observed_dist(dim=0, dist='gamma', kwds={'a':num_observations/2.0, 'scale': 2.0/num_observations}) # define your observed distribution.
         P.set_ratio() # compute ratio (evaluate your observed and pushforward densities)
         
         
@@ -113,7 +114,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
                 smooth_flag = True
 #         entropy_list.append( sstats.entropy( obs_dist.pdf(D), pf_dens.pdf(D) ) )    
         
-        res = 50;
+        res = 100;
         max_x = D.max();
         # Plot stuff
         # plt.figure(1)
@@ -122,7 +123,7 @@ fixed_noise = True, compare = False, smooth_post = False, fun_choice = 0, num_tr
         plt.title('Pushforward Q(Prior)')
         plt.xlabel('Q(lambda)')
         
-        x2 = np.linspace(0, max_x, res)
+        x2 = np.linspace(0, 5, res)
         ax2.plot(x2, obs_dist.pdf(x2))
         if compare:
             push_post_dens_kde = gauss_kde(D[:,accept_inds])
@@ -179,7 +180,7 @@ def make_tabulated_sandbox(num_experiments=1):
     lam_min, lam_max = 2.0, 7.0
     
         
-    lam_bound = [widgets.FloatRangeSlider(value=[0,1], continuous_update=False, 
+    lam_bound = [widgets.FloatRangeSlider(continuous_update=False, 
         orientation='horizontal', disable=False,
         min=lam_min, max = lam_max, step=0.5, 
         description='$\Lambda \in$') for k in range(num_experiments)]
