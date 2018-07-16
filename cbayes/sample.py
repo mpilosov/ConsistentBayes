@@ -191,14 +191,15 @@ class sample_set(object):
             assert TypeError("Please specify an integer-valued `num_samples` greater than zero.")
         pass
         
-    def set_dist(self, distribution='uniform', kwds=None, dim=None):
+    def set_dist(self, dist='uniform', kwds=None, dim=None):
         r"""
         TODO: Add this.
         """
+        distribution = dist
         if (kwds is not None) and (dim is not None):
             self.dist.set_dist(distribution, kwds, dim)
         elif (kwds is None) and (dim is not None):
-            self.dist.set_dist(distribution, dim)
+            self.dist.set_dist(dist=distribution, dim=dim)
 
         # Here we override the default errors printed by scipy.stats with our own.
         elif (kwds is None) and (distributions.supported_distributions(distribution) is 'chi2' ):
