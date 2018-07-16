@@ -60,7 +60,7 @@ def supported_distributions(distname=None):
     else: # if d is unspecified, simply return the dictionary.
         return D
 
-def assign_dist(dist, **kwds):
+def assign_dist(distribution, **kwds):
     r"""
     TODO clean up description of how this is overloaded.
     If a string is passed, it will be matched against the options for `supported_distributions`
@@ -69,8 +69,8 @@ def assign_dist(dist, **kwds):
     rtype: :class:`scipy.stats._distn_infrastructure`
     :returns: scipy distribution object 
     """
-    if type(dist) is str:
-        distribution = supported_distributions(dist)
+    if type(distribution) is str:
+        distribution = supported_distributions(distribution)
     if kwds is not None:
         return distribution(**kwds)
     else:
@@ -208,7 +208,7 @@ class parametric_dist(object):
         self.dim = dim # this mimicks the scipy.stats.multivariate attribute
         self.distributions = {str(d): None for d in range(dim)}
         
-    def rvs(self, size=None):
+    def rvs(self, size=None, seed=5397):
         r"""
         TODO: Add this.
         """
@@ -228,8 +228,7 @@ class parametric_dist(object):
             except AssertionError:
                 raise(ValueError("""
                 You are missing a distributionin key:%s, please use `self.set_dist`"""%dist))
-                      
-        output = np.concatenate( [ D[dist].rvs(size=(n,1)) for dist in D.keys() ], axis=1)
+        output = np.concatenate( [ D[dist].rvs(size=(n,1), random_state=(1+seed+int(dist)) ).reshape(-1,1) for dist in D.keys() ], axis=1)
         return output
     
     def pdf(self, eval_points):
