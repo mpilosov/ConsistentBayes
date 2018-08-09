@@ -43,7 +43,7 @@ def generate_sample_set_from_dict(U, num_samples = 1, seed=None):
     di = 0
     for n in unit_names:
         for v in unit_variables:
-            P.set_dist(**U[n][v], dim=di)
+            P.set_dist(dim=di, **U[n][v])
             param_names.append(v+'-'+n) # FORMATTING FOR NAMES
             di+=1
     
