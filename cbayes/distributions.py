@@ -217,7 +217,7 @@ class parametric_dist(object):
             size = len(D.keys())
             
         if type(size) is tuple:
-            assert(size[1] == len(D)) # make sure the dimensions are correc
+            assert(size[1] == len(D)) # make sure the dimensions are correct
             n = size[0]
         else:
             n = size
