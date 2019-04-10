@@ -21,6 +21,6 @@ setup(name='cbayes',
       url='https://github.com/mpilosov/ConsistentBayes/',
       packages=['cbayes'],
       install_requires=['matplotlib', 'scipy', 'numpy', 'nose', 'seaborn',
-          'ipykernel', 'ipywidgets', 'scikit-learn'] 
+          'ipywidgets', 'scikit-learn'] 
 )
 
