@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/mpilosov/consistentbayes.git/master)
+[![Build Status](https://travis-ci.com/mpilosov/ConsistentBayes.svg?branch=master)](https://travis-ci.com/mpilosov/ConsistentBayes) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/mpilosov/ConsistentBayes/master)
 
 # Consistent Bayes Toolbox
 
