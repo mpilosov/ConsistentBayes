@@ -51,49 +51,6 @@ class TestSampleSet:
             self.S.set_num_samples(i)
             assert_equals(self.S.num_samples, i)
 
-
-    @with_setup(setup, teardown) 
-    def test_set_dist(self): # this essentially functions as a test of assign_dist 
-        print('\n========== testing sample.sample_set.set_dist` ==========\n')
-        self.S.setup()
-        D = distributions.supported_distributions() # dictionary of distributions
-        # test `self.S.set_dist()` with no arguments.
-        # print(type(self.S.dist))
-        assert type(self.S.dist) is _distn_infrastructure.rv_frozen
-        for dist_key in D.keys(): # the dist_keys are strings representing the distributions supported.
-            # self.S.set_dist(dist_key)
-            # assert type(self.S.dist) is type(D[dist_key]()) # check that it got instantiated to the expected type. 
-            # now check that argument parameters are passed, stored, and recovered correctly
-            sz = (4,5) # test argument passing
-            if dist_key in ['normal', 'uniform']:
-                for (l,s) in zip(range(0,5), range(1,6)):
-                    self.S.set_dist(dist_key, {'loc': l, 'scale':s})
-                    kwd_dict = self.S.dist.kwds
-                    loc = kwd_dict['loc']
-                    scale = kwd_dict['scale']
-                    assert (loc == l and scale == s)
-                    # assert self.S.dist.args == sz
-            if dist_key in ['chi2']:
-                for df in range(1):
-                    self.S.set_dist(dist_key, {'df': df})
-                    kwd_dict = self.S.dist.kwds
-                    deg_freedom = kwd_dict['df']                    
-                    assert df == deg_freedom
-            if dist_key in ['gamma']:
-                for a in range(1):
-                    self.S.set_dist(dist_key, {'a': a})
-                    kwd_dict = self.S.dist.kwds
-                    shape = kwd_dict['a']                    
-                    assert a == shape
-                    
-            if dist_key in ['beta']:
-                for (a,b) in zip(range(0,5), range(1,6)):
-                    self.S.set_dist(dist_key, {'a': a, 'b':b})
-                    kwd_dict = self.S.dist.kwds
-                    aa = kwd_dict['a']
-                    bb = kwd_dict['b']
-                    assert (a == aa and b == bb)
-
     @with_setup(setup, teardown) 
     def test_generate_samples(self):
         print('\n========== testing `sample.sample_set.generate_samples` ==========\n')
@@ -108,6 +65,56 @@ class TestSampleSet:
                         self.S.generate_samples(self.S.num_samples)
                         assert self.S.samples.shape == (n, d) # ensure the samples were generated with the correct shape
 
+
+
+"""
+    @with_setup(setup, teardown) 
+    def test_set_dist(self): # this essentially functions as a test of assign_dist 
+        print('\n========== testing sample.sample_set.set_dist` ==========\n')
+        self.S.setup()
+        D = distributions.supported_distributions() # dictionary of distributions
+        # test `self.S.set_dist()` with no arguments.
+        # print(type(self.S.dist))
+        assert type(self.S.dist) is _distn_infrastructure.rv_frozen
+        for dist_key in D.keys(): # the dist_keys are strings representing the distributions supported.
+            # self.S.set_dist(dist_key)
+            # assert type(self.S.dist) is type(D[dist_key]()) # check that it got instantiated to the expected type. 
+            # now check that argument parameters are passed, stored, and recovered correctly
+            self.S.setup()
+            sz = (4,5) # test argument passing
+            if dist_key in ['normal', 'uniform']:
+                for (l,s) in zip(range(0,5), range(1,6)):
+                    self.S.setup()
+                    self.S.set_dist(dim=0, dist=dist_key, kwds={'loc': l, 'scale':s})
+                    kwd_dict = self.S.dist.kwds
+                    loc = kwd_dict['loc']
+                    scale = kwd_dict['scale']
+                    assert (loc == l and scale == s)
+                    # assert self.S.dist.args == sz
+            if dist_key in ['chi2']:
+                for df in range(1):
+                    self.S.setup()
+                    self.S.set_dist(dim=0, dist=dist_key, kwds={'df': df})
+                    kwd_dict = self.S.dist.kwds
+                    deg_freedom = kwd_dict['df']                    
+                    assert df == deg_freedom
+            if dist_key in ['gamma']:
+                for a in range(1):
+                    self.S.setup()
+                    self.S.set_dist(dim=0, dist=dist_key, kwds={'a': a})
+                    kwd_dict = self.S.dist.kwds
+                    shape = kwd_dict['a']                    
+                    assert a == shape
+                    
+            if dist_key in ['beta']:
+                for (a,b) in zip(range(0,5), range(1,6)):
+                    self.S.setup()
+                    self.S.set_dist(dim=0, dist=dist_key, kwds={'a': a, 'b':b})
+                    kwd_dict = self.S.dist.kwds
+                    aa = kwd_dict['a']
+                    bb = kwd_dict['b']
+                    assert (a == aa and b == bb)
+"""
 
 class TestProblemSet:
  

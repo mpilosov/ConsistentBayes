@@ -1,3 +1,5 @@
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/mpilosov/consistentbayes.git/master)
+
 # Consistent Bayes Toolbox
 
 This library is meant to provide a user-friendly implementation of the Consistent Bayesian framework for solving Stochastic Inverse Problems.
@@ -47,7 +49,7 @@ For more detail, please see [this draft on arxiv](https://arxiv.org/abs/1704.006
 --- 
 
 Author: Michael Pilosov  
-Updated: 2/27/2018
+Updated: 6/20/2018
 [ConsistentBayes.com](http://www.consistentbayes.com)
 
 ---
