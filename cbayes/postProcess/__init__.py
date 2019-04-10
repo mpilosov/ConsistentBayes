@@ -9,4 +9,3 @@ This subpackage provides methods for post-processing solutions to stochastic inv
 
 """
 __all__ = ['metrics', 'plot']
-

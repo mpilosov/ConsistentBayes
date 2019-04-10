@@ -17,4 +17,4 @@ sorting tools, metrics, and other functionality once the posterior is computed.
 distributions :mod:`cbayes.distributions` provides methods for handling 
 parameteric distributions
 """
-__all__ = ['sample', 'distributions', 'solve'] #, 'postProcess']
+__all__ = ['sample', 'distributions', 'solve']  # , 'postProcess']
