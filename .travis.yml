@@ -16,7 +16,8 @@ before_install:
   - sudo apt-get install gfortran libblas-dev liblapack-dev mpich libmpich-dev
 
 install:
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install scikit-learn==0.21rc2; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then pip install scikit-learn==0.21rc2; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install scikit-learn; fi
   - pip install scipy mpi4py nose codecov
   - python setup.py install
 
