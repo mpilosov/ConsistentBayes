@@ -44,7 +44,7 @@ def generate_sample_set_from_dict(U, num_samples = 1, seed=None):
     for n in unit_names:
         for v in unit_variables:
             P.set_dist(dim=di, **U[n][v])
-            param_names.append(v+'-'+n) # FORMATTING FOR NAMES
+            param_names.append(n+'__'+v) # FORMATTING FOR NAMES
             di+=1
     
     P.names = unit_names
@@ -98,7 +98,7 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
     """
     # pass a QoI_fun, grab the input samples and map them to the data space.
     input_samples = input_sample_set.samples
-    if input_samples == None:
+    if input_samples is None:
         raise(AttributeError(" `input_sample_set.samples` cannot be None."))
     output_samples = QoI_fun(input_samples) # make sure your QoI_fun conforms to size (num_samples, dim)
     if len(output_samples.shape) == 1: # enfore shape parameters by force.
