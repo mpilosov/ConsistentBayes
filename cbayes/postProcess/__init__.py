@@ -8,5 +8,4 @@ This subpackage provides methods for post-processing solutions to stochastic inv
 * :mod:`~cbayes.postProcess.plot` provides plotting utilities using the matplotlib pyplot backend. 
 
 """
-__all__ = ['metrics', 'plot']
-
+__all__ = ["metrics", "plot"]
