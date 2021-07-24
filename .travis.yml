@@ -17,8 +17,8 @@ before_install:
 
 
 install_sklearn:
-  if: python == '2.7'
   - pip install scikit-learn==0.21rc2
+    if: python = '2.7'
 
 install:
   - pip install scipy mpi4py nose codecov
