@@ -15,12 +15,8 @@ before_install:
   - "export DISPLAY=:99.0"
   - sudo apt-get install gfortran libblas-dev liblapack-dev mpich libmpich-dev
 
-
-install_sklearn:
-  - pip install scikit-learn==0.21rc2
-    if: python = '2.7'
-
 install:
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install scikit-learn==0.21rc2; fi
   - pip install scipy mpi4py nose codecov
   - python setup.py install
 
