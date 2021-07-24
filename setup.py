@@ -14,7 +14,7 @@ except ImportError:
 
 setup(
     name="cbayes",
-    version="0.4.1",
+    version="0.4.1post1",
     description="Consistent Bayesian Inversion",
     author="Michael Pilosov",
     author_email="mpilosov@gmail.com",
