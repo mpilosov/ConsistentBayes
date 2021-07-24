@@ -65,8 +65,8 @@ def generate_sample_dict(S):
     lam = S.samples
     V = {n: {v: None for v in P.vars} for n in P.names}
     for d in range(S.dim):
-        p_info = P.params[d].rsplit("-")
-        V[p_info[1]][p_info[0]] = lam[:, d]
+        p_info = P.params[d].rsplit("__")
+        V[p_info[0]][p_info[1]] = lam[:, d]
     return V
 
 
