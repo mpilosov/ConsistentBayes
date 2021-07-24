@@ -2,7 +2,7 @@
 
 import numpy as np
 import scipy.stats as sstats
-from sklearn.neighbors.kde import KernelDensity
+from sklearn.neighbors import KernelDensity
 
 r"""
 This module defines supported distributions and associated utility functions.

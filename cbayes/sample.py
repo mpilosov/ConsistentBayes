@@ -82,7 +82,7 @@ def MSE_generator(model, observed_data, sigma=None):   # this generates a sum of
         predictions = model(inputs)
         assert predictions.shape[1] == M
         residuals = predictions - observed_data
-        if sigma is not None:
+        if sigma != None:
             QoI = (1./M)*np.sum( (residuals/sigma)**2, axis=1 )   # MSE
         else:
             QoI = (1./M)*np.sum( (residuals/observed_data)**2, axis=1 )  # MRSE
@@ -98,7 +98,7 @@ def map_samples_and_create_problem(input_sample_set, QoI_fun):
     """
     # pass a QoI_fun, grab the input samples and map them to the data space.
     input_samples = input_sample_set.samples
-    if input_samples is None:
+    if input_samples == None:
         raise(AttributeError(" `input_sample_set.samples` cannot be None."))
     output_samples = QoI_fun(input_samples) # make sure your QoI_fun conforms to size (num_samples, dim)
     if len(output_samples.shape) == 1: # enfore shape parameters by force.
@@ -143,7 +143,7 @@ class sample_set(object):
             self.dim = None
             self.num_samples = None
         #: dist TODO description
-        if self.dim is not None:
+        if self.dim != None:
             self.dist = distributions.parametric_dist(self.dim)
         else:
             self.dist = None
@@ -161,13 +161,13 @@ class sample_set(object):
         r"""
         TODO: Add this.
         """
-        if self.dim is None:
-            if dimension is not None:
+        if self.dim == None:
+            if dimension != None:
                 self.dim = int(abs(dimension))
             else:
                 self.dim = 1 # default option is self.dim not yet set.
-        elif self.dim is not None:
-            if dimension is not None:
+        elif self.dim != None:
+            if dimension != None:
                 self.dim = int(abs(dimension))
             # otherwise, if nothing specified, leave it alone.
         else:
@@ -179,13 +179,13 @@ class sample_set(object):
         r"""
         TODO: Add this.
         """
-        if self.num_samples is None:
-            if num_samples is not None:
+        if self.num_samples == None:
+            if num_samples != None:
                 self.num_samples = int(abs(num_samples))
             else:
                 self.num_samples = 1000 # default option is self.num_samples not yet set.
-        elif self.num_samples is not None:
-            if num_samples is not None:
+        elif self.num_samples != None:
+            if num_samples != None:
                 self.num_samples = int(abs(num_samples))
         else:
             assert TypeError("Please specify an integer-valued `num_samples` greater than zero.")
@@ -196,21 +196,21 @@ class sample_set(object):
         TODO: Add this.
         """
         distribution = dist
-        if (kwds is not None) and (dim is not None):
+        if (kwds != None) and (dim != None):
             self.dist.set_dist(distribution, kwds, dim)
-        elif (kwds is None) and (dim is not None):
+        elif (kwds == None) and (dim != None):
             self.dist.set_dist(dist=distribution, dim=dim)
 
         # Here we override the default errors printed by scipy.stats with our own.
-        elif (kwds is None) and (distributions.supported_distributions(distribution) is 'chi2' ):
+        elif (kwds == None) and (distributions.supported_distributions(distribution) is 'chi2' ):
             raise(AttributeError("If you are using a chi2 distribution, please pass `df` as a key-value pair in a dictionary. Ex: {'df': 20}."))
-        elif (kwds is None) and (distributions.supported_distributions(distribution) is 'beta'):
+        elif (kwds == None) and (distributions.supported_distributions(distribution) is 'beta'):
             raise(AttributeError("If you are using a Beta dist, please pass `a` and `b` as key-value pairs in a dictionary. Ex: {'a': 1, 'b': 1}"))
         # the following allows for manual overrides not using the parametric object.
         # e.g. kwds = {'loc': [1,2,3]}
-        elif dim is None:
+        elif dim == None:
             # print("INPUT: No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like `.pdf` may not work as expected.")
-            if kwds is not None:
+            if kwds != None:
                 self.dist = distributions.assign_dist(distribution, **kwds)
             else: 
                 self.dist = distributions.assign_dist(distribution)
@@ -232,20 +232,20 @@ class sample_set(object):
         """
         #TODO check if dimensions specified, if not, prompt user.
         # Since we want this function to work by default, we temporarily set a default. TODO remove this behavior.
-        if self.dim is None:
+        if self.dim == None:
             if verbose: 
                 print('Dimension unspecified. Assuming 1D')
             self.dim = 1
-        if num_samples is not None:
+        if num_samples != None:
             if verbose:
                 logging.warning("Number of samples declared, written to `sample_set.num_samples`.")
             self.num_samples = num_samples
         else:
-            if self.num_samples is None:
+            if self.num_samples == None:
                 if verbose:
                     logging.warning("Number of samples undeclared, choosing 1000 by default.")
                 self.num_samples = 1000
-#        if seed is None:
+#        if seed == None:
 #            np.random.seed(self.seed) 
 #        else:
 #            np.random.seed(seed)
@@ -272,7 +272,7 @@ class problem_set(object):
         self.pushforward_dist = self.output.dist # kde object. should have rvs functionality. TODO: double check sizing with test.
         self.posterior_dist = None # this will be the dictionary object which we can use with .rvs(num_samples)
         
-        if self.output.dim is not None:
+        if self.output.dim != None:
             self.observed_dist = distributions.parametric_dist(self.output.dim)
         else:
             self.observed_dist = None
@@ -280,7 +280,7 @@ class problem_set(object):
         self.accept_inds = None # indices into input_sample_set object associated with accepted samples from accept/reject
         self.ratio = None # the ratio is the posterior density evaluated on the `input_set.samples`
         self.pf_pr_eval = None
-        if seed is None:
+        if seed == None:
             self.seed = 12112
         else:
             self.seed = seed
@@ -299,13 +299,13 @@ class problem_set(object):
                 print('Your output space is %d-dimensional'%(self.output.dim))
                 print('\t and is (%d, %d)'%(self.output.samples.shape))
                 # If input and output are both defined, check for other necessary components.               
-                if self.pushforward_dist is None:
+                if self.pushforward_dist == None:
                     print('WARNING: attribute `pushforward_dist` undefined. Necessary for `solve()`')
         
-                if self.observed_dist is None:
+                if self.observed_dist == None:
                     print('WARNING: attribute `observed_dist` undefined. Necessary for `solve()`')
         
-                if self.posterior_dist is None:
+                if self.posterior_dist == None:
                     print('Posterior distribution is empty. Inverse Problem not yet solved.')
         
             else:
@@ -325,7 +325,7 @@ class problem_set(object):
         self.pf_pr_eval = None
         if method in ['sklearn', 'sk', 'k', 'skl', 'scikit', 'sckitlearn']:
             # Use sklearn's KDE module
-            if kwds is not None:
+            if kwds != None:
                 self.output.dist  = distributions.skde(self.output.samples, mirror, **kwds)
             else:
                 self.output.dist  = distributions.skde(self.output.samples, mirror)
@@ -347,22 +347,22 @@ class problem_set(object):
         # TODO check sizes, ensure dimension agreement
          
         
-        if dist is not None:
-            if (kwds is not None) and (dim is not None):
+        if dist != None:
+            if (kwds != None) and (dim != None):
                 self.observed_dist.set_dist(dist, kwds, dim)
-            elif (kwds is None) and (dim is not None):
+            elif (kwds == None) and (dim != None):
                 self.observed_dist.set_dist(dist, dim)
 
             # Here we override the default errors printed by scipy.stats with our own.
-            elif (kwds is None) and (distributions.supported_distributions(dist) is 'chi2' ):
+            elif (kwds == None) and (distributions.supported_distributions(dist) is 'chi2' ):
                 raise(AttributeError("If you are using a chi2 distribution, please pass `df` as a key-value pair in a dictionary. Ex: {'df': 20}."))
-            elif (kwds is None) and (distributions.supported_distributions(dist) is 'beta'):
+            elif (kwds == None) and (distributions.supported_distributions(dist) is 'beta'):
                 raise(AttributeError("If you are using a Beta dist, please pass `a` and `b` as key-value pairs in a dictionary. Ex: {'a': 1, 'b': 1}"))
             # the following allows for manual overrides not using the parametric object.
             # e.g. kwds = {'loc': [1,2,3]}
-            elif dim is None:
+            elif dim == None:
                 # print("OBS: No dimension specified. You will be using `scipy.stats` for your distributions instead of the parametric object. Be warned that functions like `.pdf` may not work as expected.")
-                if kwds is not None:
+                if kwds != None:
                     self.observed_dist = distributions.assign_dist(dist, **kwds)
                 else: 
                     self.observed_dist = distributions.assign_dist(dist)
@@ -379,7 +379,7 @@ class problem_set(object):
         r"""
         TODO
         """
-        if self.pushforward_dist is None:
+        if self.pushforward_dist == None:
             raise(AttributeError("You are missing a defined pushforward distribution"))
         else:
             pf = self.pushforward_dist.pdf(self.output.samples)
@@ -404,7 +404,7 @@ class problem_set(object):
             obs = self.observed_dist.pdf(samples).reshape(n)
         if len(samples) == len(self.output.samples):
             if np.allclose(samples.ravel(), self.output.samples.ravel()): # if you are asking for evaluation of the prior
-                if self.pf_pr_eval is not None:
+                if self.pf_pr_eval != None:
                     logging.warn("Detected stored evaluation. Reusing.")
                     pf = self.pf_pr_eval
                 else: # if it hasn't been previously computed before, store it.
