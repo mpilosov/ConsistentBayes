@@ -17,7 +17,7 @@ before_install:
 
 install:
   - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then pip install scikit-learn==0.21rc2; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install scikit-learn; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then pip install scikit-learn==0.20.4; fi
   - pip install scipy mpi4py nose codecov
   - python setup.py install
 
