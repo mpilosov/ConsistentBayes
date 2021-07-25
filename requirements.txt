@@ -1,4 +1,7 @@
+# these are for nbinteract, not the package itself.
+# TODO: migrate this to another repo.
 numpy
 cbayes
 ipywidgets
 nbinteract
+matplotlib
